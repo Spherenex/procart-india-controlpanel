@@ -1,0 +1,123 @@
+.header {
+  height: var(--header-height);
+  background-color: white;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  z-index: 999;
+  transition: var(--transition);
+}
+
+.toggle-menu {
+  background: none;
+  border: none;
+  color: var(--dark);
+  font-size: 20px;
+  cursor: pointer;
+  display: none;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.admin-profile {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  padding: 8px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.admin-profile:hover {
+  background-color: var(--light);
+}
+
+.admin-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-right: 10px;
+}
+
+.admin-name {
+  font-weight: 500;
+  margin-right: 5px;
+}
+
+.dropdown-icon {
+  font-size: 12px;
+  color: var(--secondary);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  box-shadow: var(--shadow);
+  border-radius: 6px;
+  width: 180px;
+  margin-top: 10px;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  padding: 12px 20px;
+  display: block;
+  color: var(--dark);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.dropdown-item:hover {
+  background-color: var(--light);
+}
+
+.dropdown-item i {
+  margin-right: 10px;
+  width: 16px;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .header {
+    left: 0;
+  }
+  
+  .toggle-menu {
+    display: block;
+    padding: 8px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+  }
+  
+  .toggle-menu:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    padding: 0 15px;
+  }
+  
+  .admin-name {
+    display: none;
+  }
+}

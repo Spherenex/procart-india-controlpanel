@@ -1,0 +1,49 @@
+/* App layout styling */
+.App {
+  min-height: 100vh;
+}
+
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  transition: var(--transition);
+  position: relative;
+  min-height: 100vh;
+  background-color: var(--body-bg);
+}
+
+.main-content.sidebar-closed {
+  margin-left: 0;
+}
+
+/* Sidebar backdrop for mobile */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  transition: var(--transition);
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .main-content {
+    margin-left: 0; /* No margin on mobile */
+    width: 100%; /* Full width */
+  }
+  
+  /* Show backdrop when sidebar is open */
+  .dashboard.sidebar-open .sidebar-backdrop {
+    display: block;
+  }
+}

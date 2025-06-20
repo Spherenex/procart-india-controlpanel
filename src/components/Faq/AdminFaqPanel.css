@@ -1,0 +1,502 @@
+/* AdminFaqPanel.css */
+.admin-faq-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    background-color: #f9f9f9;
+}
+
+.admin-header {
+    margin-bottom: 30px;
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #5c5b5b 0%, #415970 100%);
+    border-radius: 10px;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.back-to-home-wrapper {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+}
+
+.back-to-home-link {
+    display: inline-flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.3s ease;
+}
+
+.back-to-home-link:hover {
+    opacity: 0.8;
+}
+
+.back-arrow {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+
+.admin-header h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.admin-description {
+    color: white;
+    font-size: 16px;
+    max-width: 700px;
+    margin: 0 auto 20px;
+    opacity: 0.9;
+}
+
+/* Admin Controls */
+.admin-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.settings-button,
+.add-new-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.settings-button {
+    background-color: #415970;
+    color: white;
+}
+
+.settings-button:hover {
+    background-color: #364b5d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-new-button {
+    background-color: #f83142;
+    color: white;
+}
+
+.add-new-button:hover {
+    background-color: #e47a82;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.button-icon {
+    margin-right: 8px;
+}
+
+/* Edit Form Container */
+.edit-form-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.edit-form-container h2 {
+    font-size: 24px;
+    color: #415970;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f19098;
+}
+
+.edit-form-container h3 {
+    font-size: 20px;
+    color: #415970;
+    margin: 25px 0 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #f19098;
+}
+
+/* Contact Section */
+.contact-section {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.contact-icon {
+    font-size: 24px;
+    color: #415970;
+    padding: 10px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.contact-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.save-button,
+.cancel-button,
+.add-category-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.save-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.save-button:hover {
+    background-color: #388e3c;
+}
+
+.save-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.cancel-button {
+    background-color: #f44336;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #d32f2f;
+}
+
+.add-category-btn {
+    width: 18%;
+    background-color: #f19098;
+    color: white;
+}
+
+.add-category-btn:hover {
+    background-color: #e47a82;
+}
+
+.add-category-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Categories Management */
+.categories-management {
+    margin-bottom: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+.categories-management h2 {
+    font-size: 24px;
+    color: #415970;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f19098;
+}
+
+.categories-list-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.category-admin-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border-left: 4px solid #f19098;
+}
+
+.category-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.category-label {
+    font-weight: 600;
+    color: #333;
+}
+
+.category-id {
+    font-size: 12px;
+    color: #666;
+}
+
+.category-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-category-form {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.add-category-container {
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 20px;
+}
+
+.add-category-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* FAQ Items Management */
+.faq-items-management {
+    margin-bottom: 30px;
+}
+
+.faq-items-management h2 {
+    font-size: 24px;
+    color: #415970;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f19098;
+}
+
+.loading,
+.no-faq-items {
+    text-align: center;
+    padding: 40px;
+    font-size: 16px;
+    color: #666;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.faq-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.faq-category-section {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow: hidden;
+}
+
+.category-heading {
+    font-size: 20px;
+    color: white;
+    margin: -20px -20px 20px -20px;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #f19098 0%, #415970 100%);
+}
+
+.faq-item-card {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.faq-item-card:last-child {
+    border-bottom: none;
+}
+
+.faq-item-content {
+    flex: 1;
+}
+
+.faq-item-question {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.faq-item-answer {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.faq-item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-button,
+.delete-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.edit-button {
+    background-color: #415970;
+    color: white;
+}
+
+.edit-button:hover {
+    background-color: #364b5d;
+}
+
+.delete-button {
+    background-color: #f44336;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #d32f2f;
+}
+
+/* Footer */
+.admin-faq-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    color: #666;
+    font-size: 14px;
+}
+
+.view-faq-link {
+    color: #415970;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.view-faq-link:hover {
+    color: #f19098;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-controls {
+        flex-direction: column;
+    }
+    
+    .contact-section {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .contact-icon {
+        margin-bottom: 10px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .edit-form-container {
+        padding: 20px;
+    }
+    
+    .category-admin-item {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .category-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
