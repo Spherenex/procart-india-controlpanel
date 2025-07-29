@@ -1,0 +1,953 @@
+/* Locations.css */
+
+.locations-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f5f7fa;
+  font-family: Arial, sans-serif;
+}
+
+.locations-container h1 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 24px;
+}
+
+/* Filters Section */
+.filters-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-group label {
+  font-weight: bold;
+  color: #555;
+  font-size: 14px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.filter-btn.active {
+  background-color: #333;
+  color: white;
+}
+
+.filter-icon {
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.filter-btn.quick-btn {
+  border: 1px solid #FF6B6B;
+}
+
+.filter-btn.quick-btn.active {
+  background-color: #FF6B6B;
+  color: white;
+}
+
+.filter-btn.normal-btn {
+  border: 1px solid #4ECDC4;
+}
+
+.filter-btn.normal-btn.active {
+  background-color: #4ECDC4;
+  color: white;
+}
+
+.filter-btn.late-btn {
+  border: 1px solid #FFD166;
+}
+
+.filter-btn.late-btn.active {
+  background-color: #FFD166;
+  color: #333;
+}
+
+.order-counts {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.count-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.count-value {
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Map Container */
+.map-container {
+  flex: 1;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: calc(100vh - 250px); /* Increased height to take full viewport height minus header and legend */
+  margin-bottom: 20px;
+}
+
+.google-map {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Map Legend */
+.map-legend {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: auto; /* Push to bottom of container */
+}
+
+.map-legend h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #333;
+}
+
+.legend-items {
+  display: flex;
+  gap: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid white;
+}
+
+.marker-quick {
+  background-color: #FF6B6B;
+}
+
+.marker-express {
+  background-color: #FF6B6B;
+}
+
+.marker-normal {
+  background-color: #4ECDC4;
+}
+
+.marker-late {
+  background-color: #FFD166;
+}
+
+/* Info Window Styling */
+.info-window {
+  padding: 5px;
+  max-width: 250px;
+}
+
+.info-window h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
+}
+
+.info-detail {
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-weight: bold;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.info-value {
+  font-size: 13px;
+}
+
+.delivery-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.delivery-type {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.delivery-type.marker-quick {
+  background-color: rgba(255, 107, 107, 0.2);
+  color: #d03e3e;
+}
+
+.delivery-type.marker-express {
+  background-color: rgba(255, 107, 107, 0.2);
+  color: #d03e3e;
+}
+
+.delivery-type.marker-normal {
+  background-color: rgba(78, 205, 196, 0.2);
+  color: #2a9d90;
+}
+
+.delivery-type.marker-late {
+  background-color: rgba(255, 209, 102, 0.2);
+  color: #b38728;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.status-pending {
+  background-color: #e0e0e0;
+  color: #555;
+}
+
+.status-processing {
+  background-color: #64b5f6;
+  color: white;
+}
+
+.status-shipped {
+  background-color: #81c784;
+  color: white;
+}
+
+.status-out-for-delivery {
+  background-color: #ffb74d;
+  color: #333;
+}
+
+.status-delivered {
+  background-color: #4caf50;
+  color: white;
+}
+
+.status-cancelled {
+  background-color: #e57373;
+  color: white;
+}
+
+/* Loading and Error States */
+.map-loading,
+.map-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.map-error h2 {
+  color: #e57373;
+  margin-bottom: 10px;
+}
+
+.map-error button {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .filters-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .filter-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .filter-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .map-container {
+    min-height: 70vh;
+  }
+  
+  .legend-items {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+/* Add this to your existing Locations.css file */
+
+/* Porter navigation button styling */
+.porter-navigate-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background-color: #f26522; /* Porter brand color - adjust if needed */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: center;
+}
+
+.porter-navigate-btn:hover {
+  background-color: #e05a1c; /* Darker shade for hover */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.porter-navigate-btn:active {
+  transform: translateY(1px);
+}
+
+/* Info window styling improvements */
+.info-window {
+  min-width: 250px;
+  padding: 8px 12px;
+}
+
+.info-actions {
+  margin-top: 12px;
+  border-top: 1px solid #eaeaea;
+  padding-top: 12px;
+}
+
+/* Ensure info window content is nicely formatted */
+.gm-style-iw {
+  padding: 12px !important;
+}
+
+.gm-style-iw-d {
+  overflow: hidden !important;
+}
+
+/* Make status badges more prominent */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-delivered {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.status-pending {
+  background-color: #FFC107;
+  color: #333;
+}
+
+.status-processing {
+  background-color: #2196F3;
+  color: white;
+}
+
+.status-shipped {
+  background-color: #9C27B0;
+  color: white;
+}
+
+.status-out-for-delivery {
+  background-color: #FF5722;
+  color: white;
+}
+
+.status-cancelled {
+  background-color: #F44336;
+  color: white;
+}
+
+
+/* Enhanced Locations.css */
+.locations-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 80px);
+  padding: 20px;
+  position: relative;
+}
+
+.locations-container h1 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Filters Section */
+.filters-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.filter-btn.active {
+  background-color: #e0e0e0;
+  border-color: #aaa;
+  font-weight: bold;
+}
+
+.filter-btn.quick-btn.active {
+  background-color: #FFEBEE;
+  border-color: #FF6B6B;
+}
+
+.filter-btn.normal-btn.active {
+  background-color: #E0F7FA;
+  border-color: #4ECDC4;
+}
+
+.filter-btn.late-btn.active {
+  background-color: #FFF8E1;
+  border-color: #FFD166;
+}
+
+.filter-icon {
+  margin-right: 6px;
+}
+
+.order-counts {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.count-label {
+  color: #666;
+}
+
+.count-value {
+  font-weight: bold;
+  color: #333;
+}
+
+.selected-count {
+  color: #2196F3;
+  font-weight: bold;
+}
+
+/* Route Planning Tools */
+.route-planning-tools {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.tools-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tools-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.clear-selection-btn {
+  padding: 5px 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.clear-selection-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.tools-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tool-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  background-color: #4285F4;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.tool-btn:hover:not(:disabled) {
+  background-color: #3367D6;
+}
+
+.tool-btn:disabled {
+  background-color: #b0bec5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.tool-icon {
+  margin-right: 6px;
+}
+
+.calculate-distances-btn {
+  background-color: #4CAF50;
+}
+
+.calculate-distances-btn:hover:not(:disabled) {
+  background-color: #388E3C;
+}
+
+.optimize-route-btn {
+  background-color: #FF9800;
+}
+
+.optimize-route-btn:hover:not(:disabled) {
+  background-color: #F57C00;
+}
+
+.generate-connections-btn {
+  background-color: #9C27B0;
+}
+
+.generate-connections-btn:hover:not(:disabled) {
+  background-color: #7B1FA2;
+}
+
+.calculating-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 2s linear infinite;
+}
+
+.spinner.small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Route Info Panel */
+.route-info-panel {
+  margin-top: 15px;
+  border-top: 1px solid #ddd;
+  padding-top: 15px;
+}
+
+.distances-info, .optimized-route-info, .connections-info {
+  margin-bottom: 15px;
+}
+
+.distances-info h4, .optimized-route-info h4, .connections-info h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #333;
+}
+
+.distances-table-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.distances-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.distances-table th {
+  background-color: #f5f5f5;
+  padding: 8px;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.distances-table td {
+  padding: 6px 8px;
+  border-top: 1px solid #eee;
+}
+
+.more-distances {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+}
+
+.route-stats, .connections-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666;
+}
+
+.stat-value {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.route-sequence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.sequence-item {
+  display: flex;
+  align-items: center;
+}
+
+.sequence-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: #2196F3;
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+  margin-right: 3px;
+}
+
+.sequence-arrow {
+  color: #666;
+  margin: 0 3px;
+}
+
+.connections-note {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+  margin-top: 0;
+}
+
+/* Map Container */
+.map-container {
+  flex: 1;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.google-map {
+  border-radius: 8px;
+}
+
+.map-loading, .map-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 10;
+}
+
+.map-error {
+  color: #D32F2F;
+  text-align: center;
+  padding: 20px;
+}
+
+.map-error button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Map Legend */
+.map-legend {
+  background-color: white;
+  border-radius: 6px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.map-legend h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.legend-marker {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid white;
+}
+
+.marker-quick {
+  background-color: #FF6B6B;
+}
+
+.marker-normal {
+  background-color: #4ECDC4;
+}
+
+.marker-late {
+  background-color: #FFD166;
+}
+
+.selected-marker {
+  background-color: #FFEB3B;
+  border: 1px solid #FFC107;
+}
+
+.legend-line {
+  width: 20px;
+  height: 3px;
+}
+
+.route-line {
+  background-color: #4285F4;
+}
+
+/* Info Window Styles */
+/* These styles are injected into the Google Maps info window content */
+.select-order-btn {
+  padding: 6px 12px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.select-order-btn:hover {
+  background-color: #0b7dda;
+}
+
+.select-order-btn.selected {
+  background-color: #F44336;
+}
+
+/* Distance Label on Map */
+.distance-label {
+  background-color: rgba(255,255,255,0.85);
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: bold;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .filters-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .tools-buttons {
+    flex-direction: column;
+  }
+  
+  .route-stats {
+    flex-direction: column;
+  }
+  
+  .legend-items {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

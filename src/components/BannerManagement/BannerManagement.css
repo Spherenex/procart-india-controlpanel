@@ -404,3 +404,509 @@
   font-size: 12px;
   font-weight: 600;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Banner.css - Updated with carousel styling */
+
+.banner-section {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #f6f9fc 0%, #eef1f5 100%);
+}
+
+.banner-container {
+  position: relative;
+  width: 90%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+/* Banner Header */
+.banner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.banner-badge {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #3b82f6;
+}
+
+.badge-icon {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.urgent-delivery-badge {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #ef4444;
+}
+
+.urgent-icon {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+  animation: pulse 2s infinite;
+}
+
+/* Banner Content */
+.banner-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* Banner Text */
+.banner-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.banner-text.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.banner-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+}
+
+.banner-title .highlight {
+  color: #3b82f6;
+  position: relative;
+}
+
+.banner-title .highlight::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: rgba(59, 130, 246, 0.2);
+  z-index: -1;
+  border-radius: 4px;
+}
+
+.banner-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+/* Features */
+.banner-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.feature-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  font-size: 1rem;
+  color: #3b82f6;
+}
+
+/* Banner Actions */
+.banner-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.shop-now-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+.shop-now-btn span {
+  margin-right: 0.5rem;
+}
+
+.shop-now-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(59, 130, 246, 0.3);
+}
+
+.explore-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: #3b82f6;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.explore-btn svg {
+  margin-right: 0.5rem;
+}
+
+.explore-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Banner Image */
+.banner-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+}
+
+.banner-image.animate-in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.banner-img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.image-container:hover .banner-img {
+  transform: scale(1.03);
+}
+
+/* Floating Cards */
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.floating-card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1e293b;
+  animation: float 3s infinite ease-in-out;
+}
+
+.floating-card .card-icon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.card-1 {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.card-2 {
+  top: 60%;
+  right: 10%;
+  animation-delay: 0.5s;
+}
+
+.card-3 {
+  bottom: 10%;
+  left: 15%;
+  animation-delay: 1s;
+}
+
+/* Background Decorations */
+.bg-decoration {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 1;
+  opacity: 0.4;
+}
+
+.decoration-1 {
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  left: -150px;
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+}
+
+.decoration-2 {
+  width: 200px;
+  height: 200px;
+  bottom: -100px;
+  right: -100px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+}
+
+.decoration-3 {
+  width: 150px;
+  height: 150px;
+  top: 50%;
+  right: 20%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+/* Banner Navigation Controls - NEW */
+.banner-navigation {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  z-index: 10;
+}
+
+.nav-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0 1rem;
+}
+
+.nav-arrow:hover {
+  background: #f8fafc;
+  color: #3b82f6;
+  border-color: #cbd5e1;
+}
+
+.banner-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.banner-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.banner-dot.active {
+  width: 20px;
+  background: #3b82f6;
+  border-radius: 10px;
+}
+
+.banner-dot:hover:not(.active) {
+  background: #cbd5e1;
+}
+
+/* Loading and Error States */
+.banner-loading, .banner-error {
+  width: 100%;
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.banner-error {
+  color: #ef4444;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .banner-content {
+    gap: 2rem;
+  }
+  
+  .banner-title {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .banner-image {
+    order: -1;
+  }
+  
+  .banner-text {
+    text-align: center;
+  }
+  
+  .banner-features {
+    justify-content: center;
+  }
+  
+  .banner-actions {
+    justify-content: center;
+  }
+  
+  .banner-header {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .banner-container {
+    padding: 1.5rem;
+  }
+  
+  .banner-title {
+    font-size: 1.8rem;
+  }
+  
+  .banner-description {
+    font-size: 1rem;
+  }
+  
+  .banner-features {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .floating-card {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .banner-badge, .urgent-delivery-badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .banner-dots {
+    gap: 0.25rem;
+  }
+  
+  .banner-dot {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .banner-dot.active {
+    width: 16px;
+  }
+}

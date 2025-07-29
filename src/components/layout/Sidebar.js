@@ -1,3 +1,7 @@
+
+
+
+
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Sidebar.css';
@@ -24,9 +28,9 @@ function Sidebar({ isOpen, closeSidebar, mode = 'default' }) {
     const defaultItems = [
       { path: '/dashboard', icon: 'fas fa-th-large', label: 'Dashboard' },
       { path: '/users', icon: 'fas fa-users', label: 'Users' },
-      { path: '/add-user', icon: 'fas fa-user-plus', label: 'Add User' },
-      { path: '/profile', icon: 'fas fa-user-circle', label: 'Profile' },
-      { path: '/settings', icon: 'fas fa-cog', label: 'Settings' }
+      { path: '/add-user', icon: 'fas fa-user-plus', label: 'Customer List' },
+      { path: '/locations', icon: 'fas fa-user-circle', label: 'Order Locations' },
+      // { path: '/settings', icon: 'fas fa-cog', label: 'Settings' }
     ];
     
     const itemsMode = [
@@ -46,11 +50,22 @@ function Sidebar({ isOpen, closeSidebar, mode = 'default' }) {
       { path: '/reports', icon: 'fas fa-chart-bar', label: 'Reports' }
     ];
     
+    const designHouseMode = [
+      { path: '/dashboard', icon: 'fas fa-th-large', label: 'Dashboard' },
+      { path: '/model-banner', icon: 'fas fa-images', label: 'Create Model Banner' },
+      { path: '/manage-modals', icon: 'fas fa-window-restore', label: 'Create Modals' },
+      { path: '/live-hackathons', icon: 'fas fa-laptop-code', label: 'Create Live Hackathons' },
+      { path: '/featured-products', icon: 'fas fa-star', label: 'Featured Products' },
+   
+    ];
+    
     switch(mode) {
       case 'items':
         return itemsMode;
       case 'orders':
         return ordersMode;
+      case 'designHouse':
+        return designHouseMode;
       default:
         return defaultItems;
     }

@@ -1,0 +1,77 @@
+.spec-card {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.spec-card h2 {
+  color: #333;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.spec-card h3 {
+  color: #444;
+  margin: 20px 0 15px;
+  font-size: 1.2rem;
+}
+
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.spec-table tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.spec-table td {
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.spec-name {
+  font-weight: 600;
+  color: #555;
+  width: 40%;
+}
+
+.spec-value {
+  color: #333;
+}
+
+.package-points-section {
+  margin-top: 25px;
+}
+
+.package-points-list {
+  list-style-type: disc;
+  padding-left: 25px;
+  margin-top: 10px;
+}
+
+.package-points-list li {
+  padding: 5px 0;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .spec-table td {
+    padding: 8px 10px;
+    display: block;
+  }
+  
+  .spec-name {
+    width: 100%;
+    background-color: #f5f5f5;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .spec-value {
+    padding-top: 5px;
+  }
+}

@@ -58,9 +58,7 @@ function UsersList() {
     <div className="content">
       <div className="users-header">
         <h1 className="page-title">Users Management</h1>
-        <Link to="/add-user" className="add-user-btn">
-          <i className="fas fa-plus"></i> Add New User
-        </Link>
+        
       </div>
 
       <div className="card">
@@ -114,9 +112,7 @@ function UsersList() {
                       </td>
                       <td>
                         <div className="table-actions">
-                          <Link to={`/users/${user.id}`} className="action-btn edit-btn">
-                            <i className="fas fa-edit"></i>
-                          </Link>
+                         
                           <button
                             className="action-btn delete-btn"
                             onClick={() => handleDeleteUser(user.id)}

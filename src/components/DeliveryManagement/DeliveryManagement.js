@@ -1,3 +1,8 @@
+
+
+
+
+
 // import React, { useState, useEffect } from 'react';
 // import { 
 //   collection, 
@@ -10,13 +15,13 @@
 //   where, 
 //   Timestamp,
 //   arrayUnion,
-//   serverTimestamp
+//   serverTimestamp,
+//   setDoc
 // } from 'firebase/firestore';
 // import { db } from '../../firebase/firebaseConfig';
 // import './DeliveryManagement.css';
 
 // const DeliveryManagement = () => {
-//   // State variables
 //   const [deliveries, setDeliveries] = useState({
 //     quick: [],
 //     normal: [],
@@ -29,31 +34,25 @@
 //   const [statusFilter, setStatusFilter] = useState('all');
 //   const [dateRange, setDateRange] = useState({ from: '', to: '' });
 //   const [searchTerm, setSearchTerm] = useState('');
+//   const [updateStatusLoading, setUpdateStatusLoading] = useState(false);
 
-//   // Define delivery status options
+//   // We're only allowing "Delivered" status for the delivery team
 //   const deliveryStatusOptions = [
 //     'all',
-//     'Pending',
-//     'Processing',
-//     'Out for Delivery',
-//     'Delivered',
-//     'Cancelled'
+//     'Delivered'
 //   ];
 
-//   // Fetch deliveries from Firestore
 //   useEffect(() => {
 //     const fetchDeliveries = async () => {
 //       try {
 //         setLoading(true);
 //         setError(null);
 
-//         // Base query - orders collection, ordered by orderDate (descending)
 //         let ordersQuery = query(
 //           collection(db, 'orders'),
 //           orderBy('orderDate', 'desc')
 //         );
 
-//         // Apply status filter if not 'all'
 //         if (statusFilter !== 'all') {
 //           ordersQuery = query(
 //             collection(db, 'orders'),
@@ -62,41 +61,32 @@
 //           );
 //         }
 
-//         // Execute the query
-//         const querySnapshot = await getDocs(ordersQuery);
-        
-//         // Process the results
+//         const orderSnapshot = await getDocs(ordersQuery);
 //         let ordersData = [];
-//         querySnapshot.forEach((doc) => {
+//         orderSnapshot.forEach((doc) => {
 //           const orderData = doc.data();
-          
-//           // Add the document ID to the order data
 //           ordersData.push({
 //             id: doc.id,
 //             ...orderData,
-//             // Convert Firestore timestamp to JS Date if needed
 //             orderDate: orderData.orderDate instanceof Timestamp 
 //               ? orderData.orderDate.toDate() 
 //               : new Date(orderData.orderDate)
 //           });
 //         });
 
-//         // Apply date range filter if provided
 //         if (dateRange.from && dateRange.to) {
 //           const fromDate = new Date(dateRange.from);
 //           const toDate = new Date(dateRange.to);
-//           toDate.setHours(23, 59, 59, 999); // Set to end of day
+//           toDate.setHours(23, 59, 59, 999);
           
 //           ordersData = ordersData.filter(order => {
 //             const orderDate = order.orderDate instanceof Date 
 //               ? order.orderDate 
 //               : new Date(order.orderDate);
-            
 //             return orderDate >= fromDate && orderDate <= toDate;
 //           });
 //         }
 
-//         // Apply search filter if provided
 //         if (searchTerm) {
 //           const term = searchTerm.toLowerCase();
 //           ordersData = ordersData.filter(order => 
@@ -108,59 +98,79 @@
 //           );
 //         }
 
-//         // Group deliveries by delivery speed
+//         const deliveriesQuery = query(collection(db, 'deliveries'));
+//         const deliverySnapshot = await getDocs(deliveriesQuery);
+        
 //         const groupedDeliveries = {
 //           quick: [],
 //           normal: [],
 //           late: []
 //         };
 
-//         // Process each order to extract delivery information
-//         ordersData.forEach(order => {
-//           // Initialize deliveryStatus if not present
-//           if (!order.deliveryStatus) {
-//             order.deliveryStatus = 'Pending';
-//           }
-
-//           // Group items by delivery speed
+//         for (const order of ordersData) {
 //           if (order.items && Array.isArray(order.items)) {
-//             // Track which delivery speeds are in this order
 //             const speedsInOrder = new Set();
-            
-//             // Organize items by delivery speed
 //             order.items.forEach(item => {
 //               const speed = item.deliverySpeed || 'normal';
 //               speedsInOrder.add(speed);
 //             });
-            
-//             // Create a delivery entry for each speed in the order
-//             speedsInOrder.forEach(speed => {
-//               if (groupedDeliveries[speed]) {
-//                 // Get items with this delivery speed
+
+//             for (const speed of speedsInOrder) {
+//               if (['quick', 'normal', 'late'].includes(speed)) {
 //                 const speedItems = order.items.filter(item => (item.deliverySpeed || 'normal') === speed);
                 
-//                 // Create a delivery entry for this speed
-//                 const deliveryEntry = {
-//                   id: order.id,
-//                   orderId: order.orderId || order.id,
-//                   orderDate: order.orderDate,
-//                   customerName: order.customerName || 'Guest',
-//                   customerId: order.userId || 'guest',
-//                   deliveryAddress: order.deliveryAddress || 'Not specified',
-//                   paymentMethod: order.paymentMethod || 'Not specified',
-//                   deliverySpeed: speed,
-//                   items: speedItems,
-//                   status: order.deliveryStatus || 'Pending',
-//                   statusHistory: order.statusHistory || [],
-//                   // Calculate subtotal for these items
-//                   subtotal: speedItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0)
-//                 };
-                
-//                 groupedDeliveries[speed].push(deliveryEntry);
+//                 const deliveryId = `${order.id}_${speed}`;
+//                 const deliveryRef = doc(db, 'deliveries', deliveryId);
+//                 const deliverySnap = await getDoc(deliveryRef);
+
+//                 let deliveryData;
+//                 if (!deliverySnap.exists()) {
+//                   // Get the specific status for this delivery speed from statusHistory
+//                   let speedStatus = order.status || 'Pending';
+//                   if (order.statusHistory && Array.isArray(order.statusHistory)) {
+//                     const speedStatusUpdates = order.statusHistory
+//                       .filter(update => update.deliverySpeed === speed)
+//                       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    
+//                     if (speedStatusUpdates.length > 0) {
+//                       speedStatus = speedStatusUpdates[0].status;
+//                     }
+//                   }
+                  
+//                   deliveryData = {
+//                     id: deliveryId,
+//                     orderId: order.id,
+//                     orderDate: order.orderDate,
+//                     customerName: order.customerName || 'Guest',
+//                     customerId: order.userId || 'guest',
+//                     customerEmail: order.customerEmail || 'Not provided',
+//                     customerPhone: order.customerPhone || 'Not provided',
+//                     deliveryAddress: order.deliveryAddress || 'Not specified',
+//                     paymentMethod: order.paymentMethod || 'Not specified',
+//                     paymentId: order.paymentId || 'N/A',
+//                     deliverySpeed: speed,
+//                     items: speedItems,
+//                     status: speedStatus,
+//                     statusHistory: order.statusHistory?.filter(history => history.deliverySpeed === speed) || [],
+//                     subtotal: speedItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0),
+//                     notes: order.notes || '',
+//                     createdAt: serverTimestamp(),
+//                     lastUpdated: serverTimestamp()
+//                   };
+                  
+//                   await setDoc(deliveryRef, deliveryData);
+//                 } else {
+//                   deliveryData = deliverySnap.data();
+//                   deliveryData.orderDate = deliveryData.orderDate instanceof Timestamp 
+//                     ? deliveryData.orderDate.toDate() 
+//                     : new Date(deliveryData.orderDate);
+//                 }
+
+//                 groupedDeliveries[speed].push(deliveryData);
 //               }
-//             });
+//             }
 //           }
-//         });
+//         }
 
 //         console.log("Grouped deliveries:", groupedDeliveries);
 //         setDeliveries(groupedDeliveries);
@@ -175,37 +185,58 @@
 //     fetchDeliveries();
 //   }, [statusFilter, dateRange, searchTerm]);
 
-//   // Update delivery status
-//   const updateDeliveryStatus = async (orderId, newStatus, deliverySpeed) => {
+//   const updateDeliveryStatus = async (deliveryId, newStatus) => {
 //     try {
-//       const orderRef = doc(db, 'orders', orderId);
-//       const orderDoc = await getDoc(orderRef);
+//       setUpdateStatusLoading(true);
+//       const deliveryRef = doc(db, 'deliveries', deliveryId);
+//       const deliveryDoc = await getDoc(deliveryRef);
       
-//       if (!orderDoc.exists()) {
-//         throw new Error('Order not found');
+//       if (!deliveryDoc.exists()) {
+//         throw new Error('Delivery not found');
 //       }
       
-//       // Create a status update entry
+//       const deliveryData = deliveryDoc.data();
 //       const statusUpdate = {
 //         status: newStatus,
 //         timestamp: new Date().toISOString(),
-//         deliverySpeed: deliverySpeed
+//         deliverySpeed: deliveryData.deliverySpeed
 //       };
       
-//       // Update the order document
-//       await updateDoc(orderRef, {
-//         deliveryStatus: newStatus,
+//       // Update the delivery document
+//       await updateDoc(deliveryRef, {
+//         status: newStatus,
 //         statusHistory: arrayUnion(statusUpdate),
 //         lastUpdated: serverTimestamp()
 //       });
       
+//       // Also update the corresponding order document to sync with OrdersManagement
+//       const orderId = deliveryData.orderId;
+//       if (orderId) {
+//         console.log(`Updating order ${orderId} with status ${newStatus} for ${deliveryData.deliverySpeed} delivery`);
+//         const orderRef = doc(db, 'orders', orderId);
+//         const orderDoc = await getDoc(orderRef);
+        
+//         if (orderDoc.exists()) {
+//           // Update the status history with the delivery speed to match OrdersManagement
+//           await updateDoc(orderRef, {
+//             // This will be used by the OrdersPage component to display the correct status
+//             statusHistory: arrayUnion(statusUpdate),
+//             lastUpdated: serverTimestamp()
+//           });
+          
+//           console.log(`Order ${orderId} status updated to ${newStatus} for ${deliveryData.deliverySpeed} delivery`);
+//         } else {
+//           console.error(`Order ${orderId} not found, unable to update status`);
+//         }
+//       }
+      
 //       // Update the local state
 //       setDeliveries(prevDeliveries => {
 //         const updatedDeliveries = { ...prevDeliveries };
+//         const speed = deliveryData.deliverySpeed;
         
-//         // Update the delivery in the correct category
-//         updatedDeliveries[deliverySpeed] = prevDeliveries[deliverySpeed].map(delivery => 
-//           delivery.id === orderId 
+//         updatedDeliveries[speed] = prevDeliveries[speed].map(delivery => 
+//           delivery.id === deliveryId 
 //             ? { ...delivery, status: newStatus, statusHistory: [...(delivery.statusHistory || []), statusUpdate] } 
 //             : delivery
 //         );
@@ -213,8 +244,7 @@
 //         return updatedDeliveries;
 //       });
 
-//       // If this is the selected delivery, update it too
-//       if (selectedDelivery && selectedDelivery.id === orderId) {
+//       if (selectedDelivery && selectedDelivery.id === deliveryId) {
 //         setSelectedDelivery(prev => ({ 
 //           ...prev, 
 //           status: newStatus,
@@ -223,51 +253,47 @@
 //       }
       
 //       alert(`Delivery status updated to ${newStatus}`);
+//       setUpdateStatusLoading(false);
 //     } catch (error) {
 //       console.error("Error updating delivery status:", error);
 //       alert("Failed to update delivery status. Please try again.");
+//       setUpdateStatusLoading(false);
 //     }
 //   };
 
-//   // View delivery details
-//   const viewDeliveryDetails = async (orderId, deliverySpeed) => {
+//   const viewDeliveryDetails = async (deliveryId) => {
 //     try {
-//       const orderRef = doc(db, 'orders', orderId);
-//       const orderSnap = await getDoc(orderRef);
+//       const deliveryRef = doc(db, 'deliveries', deliveryId);
+//       const deliverySnap = await getDoc(deliveryRef);
       
-//       if (orderSnap.exists()) {
-//         const orderData = orderSnap.data();
-        
-//         // Find the items with the matching delivery speed
-//         const speedItems = Array.isArray(orderData.items) 
-//           ? orderData.items.filter(item => (item.deliverySpeed || 'normal') === deliverySpeed)
-//           : [];
+//       if (deliverySnap.exists()) {
+//         const deliveryData = deliverySnap.data();
         
 //         const deliveryDetails = {
-//           id: orderSnap.id,
-//           orderId: orderData.orderId || orderSnap.id,
-//           orderDate: orderData.orderDate instanceof Timestamp 
-//             ? orderData.orderDate.toDate() 
-//             : new Date(orderData.orderDate),
-//           customerName: orderData.customerName || 'Guest',
-//           customerEmail: orderData.customerEmail || 'Not provided',
-//           customerPhone: orderData.customerPhone || 'Not provided',
-//           customerId: orderData.userId || 'guest',
-//           deliveryAddress: orderData.deliveryAddress || 'Not specified',
-//           paymentMethod: orderData.paymentMethod || 'Not specified',
-//           paymentId: orderData.paymentId || 'N/A',
-//           deliverySpeed: deliverySpeed,
-//           items: speedItems,
-//           status: orderData.deliveryStatus || 'Pending',
-//           statusHistory: orderData.statusHistory || [],
-//           subtotal: speedItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0),
-//           notes: orderData.notes || ''
+//           id: deliverySnap.id,
+//           orderId: deliveryData.orderId,
+//           orderDate: deliveryData.orderDate instanceof Timestamp 
+//             ? deliveryData.orderDate.toDate() 
+//             : new Date(deliveryData.orderDate),
+//           customerName: deliveryData.customerName,
+//           customerEmail: deliveryData.customerEmail,
+//           customerPhone: deliveryData.customerPhone,
+//           customerId: deliveryData.customerId,
+//           deliveryAddress: deliveryData.deliveryAddress,
+//           paymentMethod: deliveryData.paymentMethod,
+//           paymentId: deliveryData.paymentId,
+//           deliverySpeed: deliveryData.deliverySpeed,
+//           items: deliveryData.items,
+//           status: deliveryData.status,
+//           statusHistory: deliveryData.statusHistory,
+//           subtotal: deliveryData.subtotal,
+//           notes: deliveryData.notes
 //         };
         
 //         setSelectedDelivery(deliveryDetails);
 //         setShowDetails(true);
 //       } else {
-//         alert("Order not found!");
+//         alert("Delivery not found!");
 //       }
 //     } catch (error) {
 //       console.error("Error fetching delivery details:", error);
@@ -275,12 +301,10 @@
 //     }
 //   };
 
-//   // Format date for display
 //   const formatDate = (date) => {
 //     if (!date) return 'N/A';
     
 //     const d = date instanceof Date ? date : new Date(date);
-    
 //     if (isNaN(d.getTime())) return 'Invalid Date';
     
 //     return d.toLocaleString('en-IN', {
@@ -292,59 +316,62 @@
 //     });
 //   };
 
-//   // Get appropriate status class for styling
 //   const getStatusClass = (status) => {
 //     switch (status) {
-//       case 'Pending':
-//         return 'status-pending';
-//       case 'Processing':
-//         return 'status-processing';
-//       case 'Out for Delivery':
-//         return 'status-out-for-delivery';
-//       case 'Delivered':
-//         return 'status-delivered';
-//       case 'Cancelled':
-//         return 'status-cancelled';
-//       default:
-//         return '';
+//       case 'Pending': return 'status-pending';
+//       case 'Processing': return 'status-processing';
+//       case 'Out for Delivery': return 'status-out-for-delivery';
+//       case 'Delivered': return 'status-delivered';
+//       case 'Cancelled': return 'status-cancelled';
+//       default: return '';
 //     }
 //   };
 
-//   // Get delivery speed icon and class
 //   const getDeliverySpeedInfo = (speed) => {
 //     switch (speed) {
-//       case 'quick':
-//         return { icon: '⚡', class: 'delivery-quick' };
-//       case 'express':
-//         return { icon: '🚀', class: 'delivery-express' };
-//       case 'normal':
-//         return { icon: '🚚', class: 'delivery-normal' };
-//       case 'late':
-//         return { icon: '🐌', class: 'delivery-late' };
-//       default:
-//         return { icon: '📦', class: 'delivery-standard' };
+//       case 'quick': return { icon: '⚡', class: 'delivery-quick', name: 'Quick' };
+//       case 'normal': return { icon: '🚚', class: 'delivery-normal', name: 'Standard' };
+//       case 'late': return { icon: '🐌', class: 'delivery-late', name: 'Eco' };
+//       default: return { icon: '📦', class: 'delivery-standard', name: 'Standard' };
 //     }
 //   };
 
-//   // Reset all filters
 //   const resetFilters = () => {
 //     setStatusFilter('all');
 //     setDateRange({ from: '', to: '' });
 //     setSearchTerm('');
 //   };
 
-//   // Add delivery notes
-//   const addDeliveryNotes = async (orderId, notes) => {
+//   const addDeliveryNotes = async (deliveryId, notes) => {
 //     try {
-//       const orderRef = doc(db, 'orders', orderId);
+//       const deliveryRef = doc(db, 'deliveries', deliveryId);
+//       const deliveryDoc = await getDoc(deliveryRef);
       
-//       await updateDoc(orderRef, {
+//       if (!deliveryDoc.exists()) {
+//         throw new Error('Delivery not found');
+//       }
+      
+//       // Update the delivery document
+//       await updateDoc(deliveryRef, {
 //         notes: notes,
 //         lastUpdated: serverTimestamp()
 //       });
       
-//       // Update the selected delivery in state
-//       if (selectedDelivery && selectedDelivery.id === orderId) {
+//       // Also update the corresponding order document with the notes
+//       const orderId = deliveryDoc.data().orderId;
+//       if (orderId) {
+//         const orderRef = doc(db, 'orders', orderId);
+//         const orderDoc = await getDoc(orderRef);
+        
+//         if (orderDoc.exists()) {
+//           await updateDoc(orderRef, {
+//             notes: notes,
+//             lastUpdated: serverTimestamp()
+//           });
+//         }
+//       }
+      
+//       if (selectedDelivery && selectedDelivery.id === deliveryId) {
 //         setSelectedDelivery(prev => ({ ...prev, notes: notes }));
 //       }
       
@@ -355,7 +382,6 @@
 //     }
 //   };
 
-//   // Loading state
 //   if (loading) {
 //     return (
 //       <div className="deliveries-loading">
@@ -365,7 +391,6 @@
 //     );
 //   }
 
-//   // Error state
 //   if (error) {
 //     return (
 //       <div className="deliveries-error">
@@ -376,7 +401,6 @@
 //     );
 //   }
 
-//   // Calculate total deliveries
 //   const totalDeliveries = 
 //     deliveries.quick.length + 
 //     deliveries.normal.length + 
@@ -386,7 +410,6 @@
 //     <div className="delivery-management">
 //       <h1>Delivery Management</h1>
       
-//       {/* Filters Section */}
 //       <div className="filters-section">
 //         <div className="filter-group">
 //           <label>Status:</label>
@@ -407,13 +430,13 @@
 //           <input 
 //             type="date" 
 //             value={dateRange.from} 
-//             onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+//             onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
 //             placeholder="From"
 //           />
 //           <input 
 //             type="date" 
 //             value={dateRange.to} 
-//             onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+//             onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
 //             placeholder="To"
 //           />
 //         </div>
@@ -433,39 +456,38 @@
 //         </button>
 //       </div>
       
-//       {/* Deliveries Summary */}
+//       {/* Summary Cards - Updated names to match image */}
 //       <div className="deliveries-summary">
 //         <div className="summary-card total">
 //           <div className="summary-icon">📦</div>
 //           <div className="summary-details">
-//             <h3>Total Deliveries</h3>
+//             <h3>Total Orders</h3>
 //             <p className="summary-count">{totalDeliveries}</p>
 //           </div>
 //         </div>
 //         <div className="summary-card quick">
 //           <div className="summary-icon">⚡</div>
 //           <div className="summary-details">
-//             <h3>Quick Deliveries</h3>
+//             <h3>Quick Orders</h3>
 //             <p className="summary-count">{deliveries.quick.length}</p>
 //           </div>
 //         </div>
 //         <div className="summary-card normal">
 //           <div className="summary-icon">🚚</div>
 //           <div className="summary-details">
-//             <h3>Normal Deliveries</h3>
+//             <h3>Standard Orders</h3>
 //             <p className="summary-count">{deliveries.normal.length}</p>
 //           </div>
 //         </div>
 //         <div className="summary-card late">
 //           <div className="summary-icon">🐌</div>
 //           <div className="summary-details">
-//             <h3>Late Deliveries</h3>
+//             <h3>Eco Orders</h3>
 //             <p className="summary-count">{deliveries.late.length}</p>
 //           </div>
 //         </div>
 //       </div>
       
-//       {/* No deliveries message */}
 //       {totalDeliveries === 0 && (
 //         <div className="no-deliveries">
 //           <p>No deliveries found matching the current filters.</p>
@@ -473,13 +495,13 @@
 //         </div>
 //       )}
       
-//       {/* Quick Deliveries Section */}
+//       {/* Quick Deliveries Section - Updated header name */}
 //       {deliveries.quick.length > 0 && (
 //         <div className="delivery-section">
 //           <div className="section-header quick-header">
 //             <h2>
 //               <span className="delivery-icon">⚡</span> 
-//               Quick Deliveries ({deliveries.quick.length})
+//               Quick Orders ({deliveries.quick.length})
 //             </h2>
 //           </div>
           
@@ -498,12 +520,14 @@
 //               </thead>
 //               <tbody>
 //                 {deliveries.quick.map((delivery) => (
-//                   <tr key={`${delivery.id}-quick`}>
+//                   <tr key={delivery.id}>
 //                     <td>{delivery.orderId.substring(0, 8)}...</td>
 //                     <td>{formatDate(delivery.orderDate)}</td>
 //                     <td>{delivery.customerName}</td>
 //                     <td>{delivery.deliveryAddress.substring(0, 15)}...</td>
-//                     <td>₹{delivery.subtotal.toLocaleString('en-IN')}</td>
+//                     <td>₹{typeof delivery.subtotal === 'number' 
+//                          ? delivery.subtotal.toLocaleString('en-IN') 
+//                          : '0.00'}</td>
 //                     <td>
 //                       <span className={`status-badge ${getStatusClass(delivery.status)}`}>
 //                         {delivery.status}
@@ -513,30 +537,19 @@
 //                       <div className="action-buttons">
 //                         <button 
 //                           className="view-btn"
-//                           onClick={() => viewDeliveryDetails(delivery.id, 'quick')}
+//                           onClick={() => viewDeliveryDetails(delivery.id)}
 //                         >
 //                           View
 //                         </button>
-//                         <select
-//                           className="status-select"
-//                           value=""
-//                           onChange={(e) => {
-//                             if (e.target.value) {
-//                               updateDeliveryStatus(delivery.id, e.target.value, 'quick');
-//                               e.target.value = "";
-//                             }
-//                           }}
-//                         >
-//                           <option value="">Update Status</option>
-//                           {deliveryStatusOptions
-//                             .filter(status => status !== 'all' && status !== delivery.status)
-//                             .map(status => (
-//                               <option key={status} value={status}>
-//                                 {status}
-//                               </option>
-//                             ))
-//                           }
-//                         </select>
+//                         {delivery.status !== 'Delivered' && (
+//                           <button
+//                             className="deliver-btn"
+//                             onClick={() => updateDeliveryStatus(delivery.id, 'Delivered')}
+//                             disabled={updateStatusLoading}
+//                           >
+//                             {updateStatusLoading ? 'Updating...' : 'Mark Delivered'}
+//                           </button>
+//                         )}
 //                       </div>
 //                     </td>
 //                   </tr>
@@ -547,13 +560,13 @@
 //         </div>
 //       )}
       
-//       {/* Normal Deliveries Section */}
+//       {/* Normal Deliveries Section - Updated header name */}
 //       {deliveries.normal.length > 0 && (
 //         <div className="delivery-section">
 //           <div className="section-header normal-header">
 //             <h2>
 //               <span className="delivery-icon">🚚</span> 
-//               Normal Deliveries ({deliveries.normal.length})
+//               Standard Orders ({deliveries.normal.length})
 //             </h2>
 //           </div>
           
@@ -572,12 +585,14 @@
 //               </thead>
 //               <tbody>
 //                 {deliveries.normal.map((delivery) => (
-//                   <tr key={`${delivery.id}-normal`}>
+//                   <tr key={delivery.id}>
 //                     <td>{delivery.orderId.substring(0, 8)}...</td>
 //                     <td>{formatDate(delivery.orderDate)}</td>
 //                     <td>{delivery.customerName}</td>
 //                     <td>{delivery.deliveryAddress.substring(0, 15)}...</td>
-//                     <td>₹{delivery.subtotal.toLocaleString('en-IN')}</td>
+//                     <td>₹{typeof delivery.subtotal === 'number' 
+//                          ? delivery.subtotal.toLocaleString('en-IN') 
+//                          : '0.00'}</td>
 //                     <td>
 //                       <span className={`status-badge ${getStatusClass(delivery.status)}`}>
 //                         {delivery.status}
@@ -587,30 +602,19 @@
 //                       <div className="action-buttons">
 //                         <button 
 //                           className="view-btn"
-//                           onClick={() => viewDeliveryDetails(delivery.id, 'normal')}
+//                           onClick={() => viewDeliveryDetails(delivery.id)}
 //                         >
 //                           View
 //                         </button>
-//                         <select
-//                           className="status-select"
-//                           value=""
-//                           onChange={(e) => {
-//                             if (e.target.value) {
-//                               updateDeliveryStatus(delivery.id, e.target.value, 'normal');
-//                               e.target.value = "";
-//                             }
-//                           }}
-//                         >
-//                           <option value="">Update Status</option>
-//                           {deliveryStatusOptions
-//                             .filter(status => status !== 'all' && status !== delivery.status)
-//                             .map(status => (
-//                               <option key={status} value={status}>
-//                                 {status}
-//                               </option>
-//                             ))
-//                           }
-//                         </select>
+//                         {delivery.status !== 'Delivered' && (
+//                           <button
+//                             className="deliver-btn"
+//                             onClick={() => updateDeliveryStatus(delivery.id, 'Delivered')}
+//                             disabled={updateStatusLoading}
+//                           >
+//                             {updateStatusLoading ? 'Updating...' : 'Mark Delivered'}
+//                           </button>
+//                         )}
 //                       </div>
 //                     </td>
 //                   </tr>
@@ -621,13 +625,13 @@
 //         </div>
 //       )}
       
-//       {/* Late Deliveries Section */}
+//       {/* Late Deliveries Section - Updated header name */}
 //       {deliveries.late.length > 0 && (
 //         <div className="delivery-section">
 //           <div className="section-header late-header">
 //             <h2>
 //               <span className="delivery-icon">🐌</span> 
-//               Late Deliveries ({deliveries.late.length})
+//               Eco Orders ({deliveries.late.length})
 //             </h2>
 //           </div>
           
@@ -646,12 +650,14 @@
 //               </thead>
 //               <tbody>
 //                 {deliveries.late.map((delivery) => (
-//                   <tr key={`${delivery.id}-late`}>
+//                   <tr key={delivery.id}>
 //                     <td>{delivery.orderId.substring(0, 8)}...</td>
 //                     <td>{formatDate(delivery.orderDate)}</td>
 //                     <td>{delivery.customerName}</td>
 //                     <td>{delivery.deliveryAddress.substring(0, 15)}...</td>
-//                     <td>₹{delivery.subtotal.toLocaleString('en-IN')}</td>
+//                     <td>₹{typeof delivery.subtotal === 'number' 
+//                          ? delivery.subtotal.toLocaleString('en-IN') 
+//                          : '0.00'}</td>
 //                     <td>
 //                       <span className={`status-badge ${getStatusClass(delivery.status)}`}>
 //                         {delivery.status}
@@ -661,30 +667,19 @@
 //                       <div className="action-buttons">
 //                         <button 
 //                           className="view-btn"
-//                           onClick={() => viewDeliveryDetails(delivery.id, 'late')}
+//                           onClick={() => viewDeliveryDetails(delivery.id)}
 //                         >
 //                           View
 //                         </button>
-//                         <select
-//                           className="status-select"
-//                           value=""
-//                           onChange={(e) => {
-//                             if (e.target.value) {
-//                               updateDeliveryStatus(delivery.id, e.target.value, 'late');
-//                               e.target.value = "";
-//                             }
-//                           }}
-//                         >
-//                           <option value="">Update Status</option>
-//                           {deliveryStatusOptions
-//                             .filter(status => status !== 'all' && status !== delivery.status)
-//                             .map(status => (
-//                               <option key={status} value={status}>
-//                                 {status}
-//                               </option>
-//                             ))
-//                           }
-//                         </select>
+//                         {delivery.status !== 'Delivered' && (
+//                           <button
+//                             className="deliver-btn"
+//                             onClick={() => updateDeliveryStatus(delivery.id, 'Delivered')}
+//                             disabled={updateStatusLoading}
+//                           >
+//                             {updateStatusLoading ? 'Updating...' : 'Mark Delivered'}
+//                           </button>
+//                         )}
 //                       </div>
 //                     </td>
 //                   </tr>
@@ -708,7 +703,7 @@
 //                   setSelectedDelivery(null);
 //                 }}
 //               >
-//                 &times;
+//                 ×
 //               </button>
 //             </div>
             
@@ -719,7 +714,7 @@
 //                     {getDeliverySpeedInfo(selectedDelivery.deliverySpeed).icon}
 //                   </span>
 //                   <span className="delivery-label">
-//                     {selectedDelivery.deliverySpeed.charAt(0).toUpperCase() + selectedDelivery.deliverySpeed.slice(1)} Delivery
+//                     {getDeliverySpeedInfo(selectedDelivery.deliverySpeed).name} Delivery
 //                   </span>
 //                 </div>
 //                 <span className={`status-badge ${getStatusClass(selectedDelivery.status)}`}>
@@ -750,7 +745,9 @@
 //                   )}
 //                   <div className="info-group">
 //                     <span className="label">Subtotal:</span>
-//                     <span className="value">₹{selectedDelivery.subtotal.toLocaleString('en-IN')}</span>
+//                     <span className="value">₹{typeof selectedDelivery.subtotal === 'number'
+//                                              ? selectedDelivery.subtotal.toLocaleString('en-IN')
+//                                              : '0.00'}</span>
 //                   </div>
 //                 </div>
                 
@@ -784,7 +781,7 @@
 //               </div>
               
 //               <div className="delivery-items">
-//                 <h3>Items for {selectedDelivery.deliverySpeed.charAt(0).toUpperCase() + selectedDelivery.deliverySpeed.slice(1)} Delivery</h3>
+//                 <h3>Items for {getDeliverySpeedInfo(selectedDelivery.deliverySpeed).name} Delivery</h3>
 //                 <table className="items-table">
 //                   <thead>
 //                     <tr>
@@ -795,19 +792,23 @@
 //                     </tr>
 //                   </thead>
 //                   <tbody>
-//                     {selectedDelivery.items.map((item, index) => (
+//                     {selectedDelivery.items && selectedDelivery.items.map((item, index) => (
 //                       <tr key={index}>
 //                         <td>{item.name}</td>
-//                         <td>₹{item.price.toLocaleString('en-IN')}</td>
+//                         <td>₹{typeof item.price === 'number' ? item.price.toLocaleString('en-IN') : '0.00'}</td>
 //                         <td>{item.quantity || 1}</td>
-//                         <td>₹{((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}</td>
+//                         <td>₹{typeof item.price === 'number' ? 
+//                              ((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN') : 
+//                              '0.00'}</td>
 //                       </tr>
 //                     ))}
 //                   </tbody>
 //                   <tfoot>
 //                     <tr>
 //                       <td colSpan="3" className="total-label">Subtotal:</td>
-//                       <td className="total-value">₹{selectedDelivery.subtotal.toLocaleString('en-IN')}</td>
+//                       <td className="total-value">₹{typeof selectedDelivery.subtotal === 'number' ?
+//                                                    selectedDelivery.subtotal.toLocaleString('en-IN') :
+//                                                    '0.00'}</td>
 //                     </tr>
 //                   </tfoot>
 //                 </table>
@@ -830,7 +831,7 @@
 //                           {statusUpdate.deliverySpeed && (
 //                             <div className="timeline-delivery">
 //                               <span className={`delivery-badge ${getDeliverySpeedInfo(statusUpdate.deliverySpeed).class}`}>
-//                                 {getDeliverySpeedInfo(statusUpdate.deliverySpeed).icon} {statusUpdate.deliverySpeed}
+//                                 {getDeliverySpeedInfo(statusUpdate.deliverySpeed).icon} {getDeliverySpeedInfo(statusUpdate.deliverySpeed).name}
 //                               </span>
 //                             </div>
 //                           )}
@@ -851,7 +852,7 @@
 //                   onChange={(e) => setSelectedDelivery(prev => ({ ...prev, notes: e.target.value }))}
 //                   placeholder="Add delivery notes here..."
 //                   rows="3"
-//                 ></textarea>
+//                 />
 //                 <button 
 //                   className="save-notes-btn"
 //                   onClick={() => addDeliveryNotes(selectedDelivery.id, selectedDelivery.notes)}
@@ -863,30 +864,17 @@
 //               <div className="status-update-section">
 //                 <h3>Update Status</h3>
 //                 <div className="status-update-form">
-//                   <select
-//                     className="status-select"
-//                     value=""
-//                     onChange={(e) => {
-//                       if (e.target.value) {
-//                         updateDeliveryStatus(
-//                           selectedDelivery.id, 
-//                           e.target.value, 
-//                           selectedDelivery.deliverySpeed
-//                         );
-//                         e.target.value = "";
-//                       }
-//                     }}
-//                   >
-//                     <option value="">Select New Status</option>
-//                     {deliveryStatusOptions
-//                       .filter(status => status !== 'all' && status !== selectedDelivery.status)
-//                       .map(status => (
-//                         <option key={status} value={status}>
-//                           {status}
-//                         </option>
-//                       ))
-//                     }
-//                   </select>
+//                   {selectedDelivery.status !== 'Delivered' ? (
+//                     <button
+//                       className="deliver-btn"
+//                       onClick={() => updateDeliveryStatus(selectedDelivery.id, 'Delivered')}
+//                       disabled={updateStatusLoading}
+//                     >
+//                       {updateStatusLoading ? 'Updating...' : 'Mark as Delivered'}
+//                     </button>
+//                   ) : (
+//                     <p className="already-delivered">This delivery has been marked as delivered.</p>
+//                   )}
 //                 </div>
 //               </div>
 //             </div>
@@ -905,13 +893,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
   collection, 
-  query, 
-  orderBy, 
-  getDocs, 
+  getDocs,
   doc, 
   updateDoc, 
   getDoc,
-  where, 
   Timestamp,
   arrayUnion,
   serverTimestamp,
@@ -933,137 +918,65 @@ const DeliveryManagement = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [searchTerm, setSearchTerm] = useState('');
+  const [updateStatusLoading, setUpdateStatusLoading] = useState(false);
+  const [allOrders, setAllOrders] = useState([]); // Store all orders for filtering
+  const [filteredDeliveries, setFilteredDeliveries] = useState({
+    quick: [],
+    normal: [],
+    late: []
+  });
 
+  // We're allowing "All", "Pending", "Delivered", etc. statuses for filtering
   const deliveryStatusOptions = [
     'all',
     'Pending',
     'Processing',
     'Out for Delivery',
     'Delivered',
-    'Cancelled'
+    'Cancelled',
+    'Pending Payment'
   ];
 
   useEffect(() => {
     const fetchDeliveries = async () => {
       try {
+        console.log("Fetching all orders for delivery management...");
         setLoading(true);
         setError(null);
 
-        let ordersQuery = query(
-          collection(db, 'orders'),
-          orderBy('orderDate', 'desc')
-        );
-
-        if (statusFilter !== 'all') {
-          ordersQuery = query(
-            collection(db, 'orders'),
-            where('deliveryStatus', '==', statusFilter),
-            orderBy('orderDate', 'desc')
-          );
-        }
-
-        const orderSnapshot = await getDocs(ordersQuery);
-        let ordersData = [];
-        orderSnapshot.forEach((doc) => {
-          const orderData = doc.data();
-          ordersData.push({
-            id: doc.id,
-            ...orderData,
-            orderDate: orderData.orderDate instanceof Timestamp 
-              ? orderData.orderDate.toDate() 
-              : new Date(orderData.orderDate)
-          });
-        });
-
-        if (dateRange.from && dateRange.to) {
-          const fromDate = new Date(dateRange.from);
-          const toDate = new Date(dateRange.to);
-          toDate.setHours(23, 59, 59, 999);
-          
-          ordersData = ordersData.filter(order => {
-            const orderDate = order.orderDate instanceof Date 
-              ? order.orderDate 
-              : new Date(order.orderDate);
-            return orderDate >= fromDate && orderDate <= toDate;
-          });
-        }
-
-        if (searchTerm) {
-          const term = searchTerm.toLowerCase();
-          ordersData = ordersData.filter(order => 
-            (order.orderId && order.orderId.toLowerCase().includes(term)) || 
-            (order.id && order.id.toLowerCase().includes(term)) || 
-            (order.userId && order.userId.toLowerCase().includes(term)) ||
-            (order.customerName && order.customerName.toLowerCase().includes(term)) ||
-            (order.deliveryAddress && order.deliveryAddress.toLowerCase().includes(term))
-          );
-        }
-
-        const deliveriesQuery = query(collection(db, 'deliveries'));
-        const deliverySnapshot = await getDocs(deliveriesQuery);
+        // Simple query without complex filters - avoid index requirements
+        const ordersRef = collection(db, 'orders');
+        const orderSnapshot = await getDocs(ordersRef);
         
-        const groupedDeliveries = {
-          quick: [],
-          normal: [],
-          late: []
-        };
-
-        for (const order of ordersData) {
-          if (order.items && Array.isArray(order.items)) {
-            const speedsInOrder = new Set();
-            order.items.forEach(item => {
-              const speed = item.deliverySpeed || 'normal';
-              speedsInOrder.add(speed);
-            });
-
-            for (const speed of speedsInOrder) {
-              if (['quick', 'normal', 'late'].includes(speed)) {
-                const speedItems = order.items.filter(item => (item.deliverySpeed || 'normal') === speed);
-                
-                const deliveryId = `${order.id}_${speed}`;
-                const deliveryRef = doc(db, 'deliveries', deliveryId);
-                const deliverySnap = await getDoc(deliveryRef);
-
-                let deliveryData;
-                if (!deliverySnap.exists()) {
-                  deliveryData = {
-                    id: deliveryId,
-                    orderId: order.id,
-                    orderDate: order.orderDate,
-                    customerName: order.customerName || 'Guest',
-                    customerId: order.userId || 'guest',
-                    customerEmail: order.customerEmail || 'Not provided',
-                    customerPhone: order.customerPhone || 'Not provided',
-                    deliveryAddress: order.deliveryAddress || 'Not specified',
-                    paymentMethod: order.paymentMethod || 'Not specified',
-                    paymentId: order.paymentId || 'N/A',
-                    deliverySpeed: speed,
-                    items: speedItems,
-                    status: order.deliveryStatus || 'Pending',
-                    statusHistory: order.statusHistory?.filter(history => history.deliverySpeed === speed) || [],
-                    subtotal: speedItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0),
-                    notes: order.notes || '',
-                    createdAt: serverTimestamp(),
-                    lastUpdated: serverTimestamp()
-                  };
-                  
-                  await setDoc(deliveryRef, deliveryData);
-                } else {
-                  deliveryData = deliverySnap.data();
-                  deliveryData.orderDate = deliveryData.orderDate instanceof Timestamp 
-                    ? deliveryData.orderDate.toDate() 
-                    : new Date(deliveryData.orderDate);
-                }
-
-                groupedDeliveries[speed].push(deliveryData);
-              }
-            }
-          }
+        if (orderSnapshot.empty) {
+          console.log("No orders found");
+          setDeliveries({ quick: [], normal: [], late: [] });
+          setFilteredDeliveries({ quick: [], normal: [], late: [] });
+          setAllOrders([]);
+          setLoading(false);
+          return;
         }
 
-        console.log("Grouped deliveries:", groupedDeliveries);
-        setDeliveries(groupedDeliveries);
-        setLoading(false);
+        console.log(`Found ${orderSnapshot.size} orders`);
+        
+        // Process all orders
+        const ordersData = orderSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            orderDate: data.orderDate instanceof Timestamp 
+              ? data.orderDate.toDate() 
+              : data.orderDate ? new Date(data.orderDate) : new Date()
+          };
+        });
+        
+        // Store all orders for filtering
+        setAllOrders(ordersData);
+        
+        // Process and create deliveries from orders
+        await processDeliveries(ordersData);
+        
       } catch (err) {
         console.error("Error fetching deliveries:", err);
         setError("Failed to load deliveries. Please try again.");
@@ -1072,10 +985,173 @@ const DeliveryManagement = () => {
     };
 
     fetchDeliveries();
-  }, [statusFilter, dateRange, searchTerm]);
+  }, []); // Only fetch once on component mount
+
+  // Apply filters when filter criteria change
+  useEffect(() => {
+    if (deliveries.quick.length > 0 || deliveries.normal.length > 0 || deliveries.late.length > 0) {
+      applyFilters();
+    }
+  }, [statusFilter, dateRange, searchTerm, deliveries]);
+
+  // Create deliveries from orders
+  const processDeliveries = async (ordersData) => {
+    try {
+      const groupedDeliveries = {
+        quick: [],
+        normal: [],
+        late: []
+      };
+
+      // Process all orders
+      for (const order of ordersData) {
+        if (order.items && Array.isArray(order.items)) {
+          const speedsInOrder = new Set();
+          order.items.forEach(item => {
+            const speed = item.deliverySpeed || 'normal';
+            speedsInOrder.add(speed);
+          });
+
+          for (const speed of speedsInOrder) {
+            if (['quick', 'normal', 'late'].includes(speed)) {
+              const speedItems = order.items.filter(item => (item.deliverySpeed || 'normal') === speed);
+              
+              const deliveryId = `${order.id}_${speed}`;
+              const deliveryRef = doc(db, 'deliveries', deliveryId);
+              const deliverySnap = await getDoc(deliveryRef);
+
+              let deliveryData;
+              if (!deliverySnap.exists()) {
+                // Get the specific status for this delivery speed from statusHistory
+                let speedStatus = order.status || 'Pending';
+                if (order.statusHistory && Array.isArray(order.statusHistory)) {
+                  const speedStatusUpdates = order.statusHistory
+                    .filter(update => !update.deliverySpeed || update.deliverySpeed === speed)
+                    .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                  
+                  if (speedStatusUpdates.length > 0) {
+                    speedStatus = speedStatusUpdates[0].status;
+                  }
+                }
+                
+                deliveryData = {
+                  id: deliveryId,
+                  orderId: order.id,
+                  orderDate: order.orderDate,
+                  customerName: order.customerName || 'Guest',
+                  customerId: order.userId || 'guest',
+                  customerEmail: order.customerEmail || 'Not provided',
+                  customerPhone: order.customerPhone || 'Not provided',
+                  deliveryAddress: order.deliveryAddress || 'Not specified',
+                  paymentMethod: order.paymentMethod || 'Not specified',
+                  paymentId: order.paymentId || 'N/A',
+                  deliverySpeed: speed,
+                  items: speedItems,
+                  status: speedStatus,
+                  statusHistory: order.statusHistory?.filter(history => !history.deliverySpeed || history.deliverySpeed === speed) || [],
+                  subtotal: speedItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0),
+                  notes: order.notes || '',
+                  createdAt: serverTimestamp(),
+                  lastUpdated: serverTimestamp()
+                };
+                
+                await setDoc(deliveryRef, deliveryData);
+              } else {
+                deliveryData = deliverySnap.data();
+                deliveryData.id = deliverySnap.id; // Make sure ID is included
+                deliveryData.orderDate = deliveryData.orderDate instanceof Timestamp 
+                  ? deliveryData.orderDate.toDate() 
+                  : new Date(deliveryData.orderDate || Date.now());
+              }
+
+              groupedDeliveries[speed].push(deliveryData);
+            }
+          }
+        }
+      }
+
+      console.log("All deliveries:", groupedDeliveries);
+      setDeliveries(groupedDeliveries);
+      setFilteredDeliveries(groupedDeliveries); // Initially show all deliveries
+      setLoading(false);
+    } catch (error) {
+      console.error("Error processing orders for delivery:", error);
+      setError(`Failed to process orders: ${error.message}`);
+      setLoading(false);
+    }
+  };
+
+  // Apply filters to deliveries
+  const applyFilters = () => {
+    console.log("Applying filters:", { statusFilter, dateRange, searchTerm });
+    
+    // Make deep copy of all deliveries
+    const allDeliveries = {
+      quick: [...deliveries.quick],
+      normal: [...deliveries.normal],
+      late: [...deliveries.late]
+    };
+    
+    // Apply filters to each category
+    const filtered = {
+      quick: filterDeliveryCategory(allDeliveries.quick),
+      normal: filterDeliveryCategory(allDeliveries.normal),
+      late: filterDeliveryCategory(allDeliveries.late)
+    };
+    
+    console.log("Filtered deliveries:", filtered);
+    setFilteredDeliveries(filtered);
+  };
+  
+  // Filter a specific delivery category
+  const filterDeliveryCategory = (deliveries) => {
+    return deliveries.filter(delivery => {
+      // Status filter - case insensitive
+      if (statusFilter !== 'all') {
+        const statusLower = statusFilter.toLowerCase();
+        const deliveryStatusLower = (delivery.status || '').toLowerCase();
+        
+        if (deliveryStatusLower !== statusLower) {
+          return false;
+        }
+      }
+      
+      // Date range filter
+      if (dateRange.from && dateRange.to) {
+        const fromDate = new Date(dateRange.from);
+        fromDate.setHours(0, 0, 0, 0);
+        
+        const toDate = new Date(dateRange.to);
+        toDate.setHours(23, 59, 59, 999);
+        
+        const orderDate = delivery.orderDate instanceof Date 
+          ? delivery.orderDate 
+          : new Date(delivery.orderDate || Date.now());
+        
+        if (orderDate < fromDate || orderDate > toDate) {
+          return false;
+        }
+      }
+      
+      // Search filter
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        
+        return (
+          (delivery.orderId && delivery.orderId.toLowerCase().includes(term)) || 
+          (delivery.customerName && delivery.customerName.toLowerCase().includes(term)) || 
+          (delivery.deliveryAddress && delivery.deliveryAddress.toLowerCase().includes(term)) ||
+          (delivery.customerId && delivery.customerId.toLowerCase().includes(term))
+        );
+      }
+      
+      return true;
+    });
+  };
 
   const updateDeliveryStatus = async (deliveryId, newStatus) => {
     try {
+      setUpdateStatusLoading(true);
       const deliveryRef = doc(db, 'deliveries', deliveryId);
       const deliveryDoc = await getDoc(deliveryRef);
       
@@ -1083,21 +1159,57 @@ const DeliveryManagement = () => {
         throw new Error('Delivery not found');
       }
       
+      const deliveryData = deliveryDoc.data();
       const statusUpdate = {
         status: newStatus,
         timestamp: new Date().toISOString(),
-        deliverySpeed: deliveryDoc.data().deliverySpeed
+        deliverySpeed: deliveryData.deliverySpeed
       };
       
+      // Update the delivery document
       await updateDoc(deliveryRef, {
         status: newStatus,
         statusHistory: arrayUnion(statusUpdate),
         lastUpdated: serverTimestamp()
       });
       
+      // Also update the corresponding order document to sync with OrdersManagement
+      const orderId = deliveryData.orderId;
+      if (orderId) {
+        console.log(`Updating order ${orderId} with status ${newStatus} for ${deliveryData.deliverySpeed} delivery`);
+        const orderRef = doc(db, 'orders', orderId);
+        const orderDoc = await getDoc(orderRef);
+        
+        if (orderDoc.exists()) {
+          // Update the status history with the delivery speed to match OrdersManagement
+          await updateDoc(orderRef, {
+            // This will be used by the OrdersPage component to display the correct status
+            statusHistory: arrayUnion(statusUpdate),
+            status: newStatus, // Also update the main status field
+            lastUpdated: serverTimestamp()
+          });
+          
+          // Update the order in allOrders state
+          setAllOrders(prev => prev.map(order => 
+            order.id === orderId 
+              ? {
+                  ...order, 
+                  status: newStatus, 
+                  statusHistory: [...(order.statusHistory || []), statusUpdate]
+                }
+              : order
+          ));
+          
+          console.log(`Order ${orderId} status updated to ${newStatus} for ${deliveryData.deliverySpeed} delivery`);
+        } else {
+          console.error(`Order ${orderId} not found, unable to update status`);
+        }
+      }
+      
+      // Update the local state
       setDeliveries(prevDeliveries => {
         const updatedDeliveries = { ...prevDeliveries };
-        const speed = deliveryDoc.data().deliverySpeed;
+        const speed = deliveryData.deliverySpeed;
         
         updatedDeliveries[speed] = prevDeliveries[speed].map(delivery => 
           delivery.id === deliveryId 
@@ -1116,10 +1228,16 @@ const DeliveryManagement = () => {
         }));
       }
       
+      // Reapply filters after update
+      setTimeout(() => applyFilters(), 100);
+      
       alert(`Delivery status updated to ${newStatus}`);
+      
     } catch (error) {
       console.error("Error updating delivery status:", error);
       alert("Failed to update delivery status. Please try again.");
+    } finally {
+      setUpdateStatusLoading(false);
     }
   };
 
@@ -1136,7 +1254,7 @@ const DeliveryManagement = () => {
           orderId: deliveryData.orderId,
           orderDate: deliveryData.orderDate instanceof Timestamp 
             ? deliveryData.orderDate.toDate() 
-            : new Date(deliveryData.orderDate),
+            : new Date(deliveryData.orderDate || Date.now()),
           customerName: deliveryData.customerName,
           customerEmail: deliveryData.customerEmail,
           customerPhone: deliveryData.customerPhone,
@@ -1166,36 +1284,44 @@ const DeliveryManagement = () => {
   const formatDate = (date) => {
     if (!date) return 'N/A';
     
-    const d = date instanceof Date ? date : new Date(date);
-    if (isNaN(d.getTime())) return 'Invalid Date';
-    
-    return d.toLocaleString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      const d = date instanceof Date ? date : new Date(date);
+      if (isNaN(d.getTime())) return 'Invalid Date';
+      
+      return d.toLocaleString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return 'Invalid Date';
+    }
   };
 
   const getStatusClass = (status) => {
-    switch (status) {
-      case 'Pending': return 'status-pending';
-      case 'Processing': return 'status-processing';
-      case 'Out for Delivery': return 'status-out-for-delivery';
-      case 'Delivered': return 'status-delivered';
-      case 'Cancelled': return 'status-cancelled';
+    // Case-insensitive status matching
+    const statusLower = (status || '').toLowerCase();
+    
+    switch (statusLower) {
+      case 'pending': return 'status-pending';
+      case 'processing': return 'status-processing';
+      case 'out for delivery': return 'status-out-for-delivery';
+      case 'delivered': return 'status-delivered';
+      case 'cancelled': return 'status-cancelled';
+      case 'pending payment': return 'status-pending-payment';
       default: return '';
     }
   };
 
   const getDeliverySpeedInfo = (speed) => {
     switch (speed) {
-      case 'quick': return { icon: '⚡', class: 'delivery-quick' };
-      case 'express': return { icon: '🚀', class: 'delivery-express' };
-      case 'normal': return { icon: '🚚', class: 'delivery-normal' };
-      case 'late': return { icon: '🐌', class: 'delivery-late' };
-      default: return { icon: '📦', class: 'delivery-standard' };
+      case 'quick': return { icon: '⚡', class: 'delivery-quick', name: 'Quick' };
+      case 'normal': return { icon: '🚚', class: 'delivery-normal', name: 'Standard' };
+      case 'late': return { icon: '🐌', class: 'delivery-late', name: 'Eco' };
+      default: return { icon: '📦', class: 'delivery-standard', name: 'Standard' };
     }
   };
 
@@ -1208,15 +1334,57 @@ const DeliveryManagement = () => {
   const addDeliveryNotes = async (deliveryId, notes) => {
     try {
       const deliveryRef = doc(db, 'deliveries', deliveryId);
+      const deliveryDoc = await getDoc(deliveryRef);
       
+      if (!deliveryDoc.exists()) {
+        throw new Error('Delivery not found');
+      }
+      
+      // Update the delivery document
       await updateDoc(deliveryRef, {
         notes: notes,
         lastUpdated: serverTimestamp()
       });
       
+      // Also update the corresponding order document with the notes
+      const orderId = deliveryDoc.data().orderId;
+      if (orderId) {
+        const orderRef = doc(db, 'orders', orderId);
+        const orderDoc = await getDoc(orderRef);
+        
+        if (orderDoc.exists()) {
+          await updateDoc(orderRef, {
+            notes: notes,
+            lastUpdated: serverTimestamp()
+          });
+          
+          // Update in allOrders state
+          setAllOrders(prev => prev.map(order => 
+            order.id === orderId ? { ...order, notes } : order
+          ));
+        }
+      }
+      
+      // Update local state
+      setDeliveries(prev => {
+        const speed = deliveryDoc.data().deliverySpeed;
+        const updated = { ...prev };
+        
+        if (updated[speed]) {
+          updated[speed] = updated[speed].map(delivery => 
+            delivery.id === deliveryId ? { ...delivery, notes } : delivery
+          );
+        }
+        
+        return updated;
+      });
+      
       if (selectedDelivery && selectedDelivery.id === deliveryId) {
         setSelectedDelivery(prev => ({ ...prev, notes: notes }));
       }
+      
+      // Reapply filters after update
+      setTimeout(() => applyFilters(), 100);
       
       alert('Delivery notes updated successfully');
     } catch (error) {
@@ -1245,9 +1413,9 @@ const DeliveryManagement = () => {
   }
 
   const totalDeliveries = 
-    deliveries.quick.length + 
-    deliveries.normal.length + 
-    deliveries.late.length;
+    filteredDeliveries.quick.length + 
+    filteredDeliveries.normal.length + 
+    filteredDeliveries.late.length;
 
   return (
     <div className="delivery-management">
@@ -1299,33 +1467,34 @@ const DeliveryManagement = () => {
         </button>
       </div>
       
+      {/* Summary Cards - Updated to use filteredDeliveries */}
       <div className="deliveries-summary">
         <div className="summary-card total">
           <div className="summary-icon">📦</div>
           <div className="summary-details">
-            <h3>Total Deliveries</h3>
+            <h3>Total Orders</h3>
             <p className="summary-count">{totalDeliveries}</p>
           </div>
         </div>
         <div className="summary-card quick">
           <div className="summary-icon">⚡</div>
           <div className="summary-details">
-            <h3>Quick Deliveries</h3>
-            <p className="summary-count">{deliveries.quick.length}</p>
+            <h3>Quick Orders</h3>
+            <p className="summary-count">{filteredDeliveries.quick.length}</p>
           </div>
         </div>
         <div className="summary-card normal">
           <div className="summary-icon">🚚</div>
           <div className="summary-details">
-            <h3>Normal Deliveries</h3>
-            <p className="summary-count">{deliveries.normal.length}</p>
+            <h3>Standard Orders</h3>
+            <p className="summary-count">{filteredDeliveries.normal.length}</p>
           </div>
         </div>
         <div className="summary-card late">
           <div className="summary-icon">🐌</div>
           <div className="summary-details">
-            <h3>Late Deliveries</h3>
-            <p className="summary-count">{deliveries.late.length}</p>
+            <h3>Eco Orders</h3>
+            <p className="summary-count">{filteredDeliveries.late.length}</p>
           </div>
         </div>
       </div>
@@ -1337,12 +1506,13 @@ const DeliveryManagement = () => {
         </div>
       )}
       
-      {deliveries.quick.length > 0 && (
+      {/* Quick Deliveries Section */}
+      {filteredDeliveries.quick.length > 0 && (
         <div className="delivery-section">
           <div className="section-header quick-header">
             <h2>
               <span className="delivery-icon">⚡</span> 
-              Quick Deliveries ({deliveries.quick.length})
+              Quick Orders ({filteredDeliveries.quick.length})
             </h2>
           </div>
           
@@ -1360,13 +1530,17 @@ const DeliveryManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {deliveries.quick.map((delivery) => (
+                {filteredDeliveries.quick.map((delivery) => (
                   <tr key={delivery.id}>
                     <td>{delivery.orderId.substring(0, 8)}...</td>
                     <td>{formatDate(delivery.orderDate)}</td>
                     <td>{delivery.customerName}</td>
-                    <td>{delivery.deliveryAddress.substring(0, 15)}...</td>
-                    <td>₹{delivery.subtotal.toLocaleString('en-IN')}</td>
+                    <td>{delivery.deliveryAddress && delivery.deliveryAddress.length > 15 ? 
+                      `${delivery.deliveryAddress.substring(0, 15)}...` : 
+                      delivery.deliveryAddress || 'Not specified'}</td>
+                    <td>₹{typeof delivery.subtotal === 'number' 
+                         ? delivery.subtotal.toLocaleString('en-IN') 
+                         : '0.00'}</td>
                     <td>
                       <span className={`status-badge ${getStatusClass(delivery.status)}`}>
                         {delivery.status}
@@ -1380,26 +1554,15 @@ const DeliveryManagement = () => {
                         >
                           View
                         </button>
-                        <select
-                          className="status-select"
-                          value=""
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              updateDeliveryStatus(delivery.id, e.target.value);
-                              e.target.value = "";
-                            }
-                          }}
-                        >
-                          <option value="">Update Status</option>
-                          {deliveryStatusOptions
-                            .filter(status => status !== 'all' && status !== delivery.status)
-                            .map(status => (
-                              <option key={status} value={status}>
-                                {status}
-                              </option>
-                            ))
-                          }
-                        </select>
+                        {(delivery.status || '').toLowerCase() !== 'delivered' && (
+                          <button
+                            className="deliver-btn"
+                            onClick={() => updateDeliveryStatus(delivery.id, 'Delivered')}
+                            disabled={updateStatusLoading}
+                          >
+                            {updateStatusLoading ? 'Updating...' : 'Mark Delivered'}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -1410,12 +1573,13 @@ const DeliveryManagement = () => {
         </div>
       )}
       
-      {deliveries.normal.length > 0 && (
+      {/* Standard Deliveries Section */}
+      {filteredDeliveries.normal.length > 0 && (
         <div className="delivery-section">
           <div className="section-header normal-header">
             <h2>
               <span className="delivery-icon">🚚</span> 
-              Normal Deliveries ({deliveries.normal.length})
+              Standard Orders ({filteredDeliveries.normal.length})
             </h2>
           </div>
           
@@ -1433,13 +1597,17 @@ const DeliveryManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {deliveries.normal.map((delivery) => (
+                {filteredDeliveries.normal.map((delivery) => (
                   <tr key={delivery.id}>
                     <td>{delivery.orderId.substring(0, 8)}...</td>
                     <td>{formatDate(delivery.orderDate)}</td>
                     <td>{delivery.customerName}</td>
-                    <td>{delivery.deliveryAddress.substring(0, 15)}...</td>
-                    <td>₹{delivery.subtotal.toLocaleString('en-IN')}</td>
+                    <td>{delivery.deliveryAddress && delivery.deliveryAddress.length > 15 ? 
+                      `${delivery.deliveryAddress.substring(0, 15)}...` : 
+                      delivery.deliveryAddress || 'Not specified'}</td>
+                    <td>₹{typeof delivery.subtotal === 'number' 
+                         ? delivery.subtotal.toLocaleString('en-IN') 
+                         : '0.00'}</td>
                     <td>
                       <span className={`status-badge ${getStatusClass(delivery.status)}`}>
                         {delivery.status}
@@ -1453,26 +1621,15 @@ const DeliveryManagement = () => {
                         >
                           View
                         </button>
-                        <select
-                          className="status-select"
-                          value=""
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              updateDeliveryStatus(delivery.id, e.target.value);
-                              e.target.value = "";
-                            }
-                          }}
-                        >
-                          <option value="">Update Status</option>
-                          {deliveryStatusOptions
-                            .filter(status => status !== 'all' && status !== delivery.status)
-                            .map(status => (
-                              <option key={status} value={status}>
-                                {status}
-                              </option>
-                            ))
-                          }
-                        </select>
+                        {(delivery.status || '').toLowerCase() !== 'delivered' && (
+                          <button
+                            className="deliver-btn"
+                            onClick={() => updateDeliveryStatus(delivery.id, 'Delivered')}
+                            disabled={updateStatusLoading}
+                          >
+                            {updateStatusLoading ? 'Updating...' : 'Mark Delivered'}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -1483,12 +1640,13 @@ const DeliveryManagement = () => {
         </div>
       )}
       
-      {deliveries.late.length > 0 && (
+      {/* Eco Deliveries Section */}
+      {filteredDeliveries.late.length > 0 && (
         <div className="delivery-section">
           <div className="section-header late-header">
             <h2>
               <span className="delivery-icon">🐌</span> 
-              Late Deliveries ({deliveries.late.length})
+              Eco Orders ({filteredDeliveries.late.length})
             </h2>
           </div>
           
@@ -1506,13 +1664,17 @@ const DeliveryManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {deliveries.late.map((delivery) => (
+                {filteredDeliveries.late.map((delivery) => (
                   <tr key={delivery.id}>
                     <td>{delivery.orderId.substring(0, 8)}...</td>
                     <td>{formatDate(delivery.orderDate)}</td>
                     <td>{delivery.customerName}</td>
-                    <td>{delivery.deliveryAddress.substring(0, 15)}...</td>
-                    <td>₹{delivery.subtotal.toLocaleString('en-IN')}</td>
+                    <td>{delivery.deliveryAddress && delivery.deliveryAddress.length > 15 ? 
+                      `${delivery.deliveryAddress.substring(0, 15)}...` : 
+                      delivery.deliveryAddress || 'Not specified'}</td>
+                    <td>₹{typeof delivery.subtotal === 'number' 
+                         ? delivery.subtotal.toLocaleString('en-IN') 
+                         : '0.00'}</td>
                     <td>
                       <span className={`status-badge ${getStatusClass(delivery.status)}`}>
                         {delivery.status}
@@ -1526,26 +1688,15 @@ const DeliveryManagement = () => {
                         >
                           View
                         </button>
-                        <select
-                          className="status-select"
-                          value=""
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              updateDeliveryStatus(delivery.id, e.target.value);
-                              e.target.value = "";
-                            }
-                          }}
-                        >
-                          <option value="">Update Status</option>
-                          {deliveryStatusOptions
-                            .filter(status => status !== 'all' && status !== delivery.status)
-                            .map(status => (
-                              <option key={status} value={status}>
-                                {status}
-                              </option>
-                            ))
-                          }
-                        </select>
+                        {(delivery.status || '').toLowerCase() !== 'delivered' && (
+                          <button
+                            className="deliver-btn"
+                            onClick={() => updateDeliveryStatus(delivery.id, 'Delivered')}
+                            disabled={updateStatusLoading}
+                          >
+                            {updateStatusLoading ? 'Updating...' : 'Mark Delivered'}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -1556,6 +1707,7 @@ const DeliveryManagement = () => {
         </div>
       )}
       
+      {/* Delivery Details Modal */}
       {showDetails && selectedDelivery && (
         <div className="delivery-details-modal">
           <div className="modal-content">
@@ -1579,7 +1731,7 @@ const DeliveryManagement = () => {
                     {getDeliverySpeedInfo(selectedDelivery.deliverySpeed).icon}
                   </span>
                   <span className="delivery-label">
-                    {selectedDelivery.deliverySpeed.charAt(0).toUpperCase() + selectedDelivery.deliverySpeed.slice(1)} Delivery
+                    {getDeliverySpeedInfo(selectedDelivery.deliverySpeed).name} Delivery
                   </span>
                 </div>
                 <span className={`status-badge ${getStatusClass(selectedDelivery.status)}`}>
@@ -1610,7 +1762,9 @@ const DeliveryManagement = () => {
                   )}
                   <div className="info-group">
                     <span className="label">Subtotal:</span>
-                    <span className="value">₹{selectedDelivery.subtotal.toLocaleString('en-IN')}</span>
+                    <span className="value">₹{typeof selectedDelivery.subtotal === 'number'
+                                             ? selectedDelivery.subtotal.toLocaleString('en-IN')
+                                             : '0.00'}</span>
                   </div>
                 </div>
                 
@@ -1644,7 +1798,7 @@ const DeliveryManagement = () => {
               </div>
               
               <div className="delivery-items">
-                <h3>Items for {selectedDelivery.deliverySpeed.charAt(0).toUpperCase() + selectedDelivery.deliverySpeed.slice(1)} Delivery</h3>
+                <h3>Items for {getDeliverySpeedInfo(selectedDelivery.deliverySpeed).name} Delivery</h3>
                 <table className="items-table">
                   <thead>
                     <tr>
@@ -1655,19 +1809,23 @@ const DeliveryManagement = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {selectedDelivery.items.map((item, index) => (
+                    {selectedDelivery.items && selectedDelivery.items.map((item, index) => (
                       <tr key={index}>
                         <td>{item.name}</td>
-                        <td>₹{item.price.toLocaleString('en-IN')}</td>
+                        <td>₹{typeof item.price === 'number' ? item.price.toLocaleString('en-IN') : '0.00'}</td>
                         <td>{item.quantity || 1}</td>
-                        <td>₹{((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}</td>
+                        <td>₹{typeof item.price === 'number' ? 
+                             ((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN') : 
+                             '0.00'}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
                     <tr>
                       <td colSpan="3" className="total-label">Subtotal:</td>
-                      <td className="total-value">₹{selectedDelivery.subtotal.toLocaleString('en-IN')}</td>
+                      <td className="total-value">₹{typeof selectedDelivery.subtotal === 'number' ?
+                                                   selectedDelivery.subtotal.toLocaleString('en-IN') :
+                                                   '0.00'}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -1680,7 +1838,7 @@ const DeliveryManagement = () => {
                     {selectedDelivery.statusHistory.map((statusUpdate, index) => (
                       <div className="timeline-item" key={index}>
                         <div className="timeline-marker"></div>
-                        <div className ="timeline-content">
+                        <div className="timeline-content">
                           <div className="timeline-date">{formatDate(statusUpdate.timestamp)}</div>
                           <div className="timeline-status">
                             <span className={`status-badge ${getStatusClass(statusUpdate.status)}`}>
@@ -1690,7 +1848,7 @@ const DeliveryManagement = () => {
                           {statusUpdate.deliverySpeed && (
                             <div className="timeline-delivery">
                               <span className={`delivery-badge ${getDeliverySpeedInfo(statusUpdate.deliverySpeed).class}`}>
-                                {getDeliverySpeedInfo(statusUpdate.deliverySpeed).icon} {statusUpdate.deliverySpeed}
+                                {getDeliverySpeedInfo(statusUpdate.deliverySpeed).icon} {getDeliverySpeedInfo(statusUpdate.deliverySpeed).name}
                               </span>
                             </div>
                           )}
@@ -1723,26 +1881,17 @@ const DeliveryManagement = () => {
               <div className="status-update-section">
                 <h3>Update Status</h3>
                 <div className="status-update-form">
-                  <select
-                    className="status-select"
-                    value=""
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        updateDeliveryStatus(selectedDelivery.id, e.target.value);
-                        e.target.value = "";
-                      }
-                    }}
-                  >
-                    <option value="">Select New Status</option>
-                    {deliveryStatusOptions
-                      .filter(status => status !== 'all' && status !== selectedDelivery.status)
-                      .map(status => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))
-                    }
-                  </select>
+                  {(selectedDelivery.status || '').toLowerCase() !== 'delivered' ? (
+                    <button
+                      className="deliver-btn"
+                      onClick={() => updateDeliveryStatus(selectedDelivery.id, 'Delivered')}
+                      disabled={updateStatusLoading}
+                    >
+                      {updateStatusLoading ? 'Updating...' : 'Mark as Delivered'}
+                    </button>
+                  ) : (
+                    <p className="already-delivered">This delivery has been marked as delivered.</p>
+                  )}
                 </div>
               </div>
             </div>

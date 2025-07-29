@@ -1139,10 +1139,8 @@ const AdminBlogPanel = () => {
                         Back to Dashboard
                     </Link>
                 </div>
-                <h1>ProCart Blog Admin Panel</h1>
-                <p className="admin-description">
-                    Manage your blog content, customize settings, create new articles, edit existing ones, or delete outdated content.
-                </p>
+                <h1 style={{color:'white', textAlign:'center', right:'300px', position:'relative'}}>ProCart Blog Admin Panel</h1>
+                
             </div>
 
             <div className="admin-controls">

@@ -366,10 +366,8 @@ const AdminFaqPanel = () => {
                         Back to Dashboard
                     </Link>
                 </div>
-                <h1>ProCart FAQ Admin Panel</h1>
-                <p className="admin-description">
-                    Manage your FAQ content, support contact information, and categories.
-                </p>
+                <h1 style={{color:'white', textAlign:'center', right:'300px', position:'relative'}}>ProCart FAQ Admin Panel</h1>
+                
             </div>
 
             <div className="admin-controls">

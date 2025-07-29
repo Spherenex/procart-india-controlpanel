@@ -422,10 +422,8 @@ const AdminNewsroomPanel = () => {
                         Back to Dashboard
                     </Link>
                 </div>
-                <h1>ProCart Newsroom Admin Panel</h1>
-                <p className="admin-description">
-                    Manage your newsroom content, customize settings, create news items, set featured stories, and more.
-                </p>
+                <h1 style={{color:'white', textAlign:'center', right:'300px', position:'relative'}}>ProCart Newsroom Admin Panel</h1>
+                
             </div>
 
             <div className="admin-controls">

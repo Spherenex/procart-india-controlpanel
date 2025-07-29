@@ -2,7 +2,11 @@
 
 
 
+
+
+
 // import React, { useState, useEffect } from 'react';
+// import { useLocation, useNavigate } from 'react-router-dom';
 // import { 
 //   collection, 
 //   getDocs, 
@@ -23,64 +27,68 @@
 //   getDownloadURL, 
 //   deleteObject 
 // } from 'firebase/storage';
-// import { useLocation, useNavigate } from 'react-router-dom';
+// import SpecificationComponent from './SpecificationComponent';
 // import { db, storage } from '../../firebase/firebaseConfig';
 // import './ProductManagement.css';
 
 // const ProductManagement = () => {
-//   // Navigation
 //   const navigate = useNavigate();
 //   const location = useLocation();
 //   const queryParams = new URLSearchParams(location.search);
 //   const urlMode = queryParams.get('mode');
 //   const editId = queryParams.get('edit');
-  
-//   // Mode state
-//   const [activeMode, setActiveMode] = useState(urlMode || 'trending'); // 'trending', 'categories', or 'categoryItems'
-  
-//   // Products (Trending Components) state
+
+//   const [activeMode, setActiveMode] = useState(urlMode || 'trending');
 //   const [products, setProducts] = useState([]);
-  
-//   // Categories state
 //   const [categories, setCategories] = useState([]);
-  
-//   // Category Items state
 //   const [categoryItems, setCategoryItems] = useState([]);
-  
-//   // Shared state
 //   const [loading, setLoading] = useState(true);
-//   const [formMode, setFormMode] = useState('add'); // 'add' or 'edit'
+//   const [formMode, setFormMode] = useState('add');
 //   const [currentItemId, setCurrentItemId] = useState(null);
 //   const [imageFile, setImageFile] = useState(null);
 //   const [imagePreview, setImagePreview] = useState(null);
 //   const [uploadProgress, setUploadProgress] = useState(0);
 //   const [isUploading, setIsUploading] = useState(false);
-  
-//   // Product form state
+
 //   const [productFormData, setProductFormData] = useState({
 //     name: '',
 //     price: '',
 //     description: '',
 //     fullDescription: '',
-//     material: '',
+//     microcontroller: '',
+//     operatingVoltage: '',
+//     inputVoltageRecommended: '',
+//     inputVoltageLimits: '',
+//     digitalIOPins: '',
+//     analogInputPins: '',
+//     pwmChannels: '',
+//     clockSpeed: '',
+//     flashMemory: '',
+//     sram: '',
+//     eeprom: '',
+//     usbInterface: '',
+//     communicationInterfaces: '',
 //     dimensions: '',
 //     weight: '',
+//     operatingTemperature: '',
+//     powerConsumption: '',
+//     ledIndicators: '',
+//     material: '',
 //     warranty: '',
 //     projectUsages: ['', '', '', ''],
+//     deliverySpeed: 'normal',
 //     isQuick: true,
 //     active: true,
 //     imageUrl: ''
 //   });
-  
-//   // Category form state
+
 //   const [categoryFormData, setCategoryFormData] = useState({
 //     name: '',
 //     description: '',
 //     active: true,
 //     imageUrl: ''
 //   });
-  
-//   // Category Item form state
+
 //   const [categoryItemFormData, setCategoryItemFormData] = useState({
 //     categoryId: '',
 //     categoryName: '',
@@ -88,35 +96,48 @@
 //     price: '',
 //     description: '',
 //     fullDescription: '',
-//     material: '',
+//     microcontroller: '',
+//     operatingVoltage: '',
+//     inputVoltageRecommended: '',
+//     inputVoltageLimits: '',
+//     digitalIOPins: '',
+//     analogInputPins: '',
+//     pwmChannels: '',
+//     clockSpeed: '',
+//     flashMemory: '',
+//     sram: '',
+//     eeprom: '',
+//     usbInterface: '',
+//     communicationInterfaces: '',
 //     dimensions: '',
+//     weight: '',
+//     operatingTemperature: '',
+//     powerConsumption: '',
+//     ledIndicators: '',
+//     material: '',
+//     warranty: '',
+//     deliverySpeed: 'normal',
 //     active: true,
 //     imageUrl: ''
 //   });
-  
-//   // Fetch data on component mount
+
 //   useEffect(() => {
 //     fetchData();
-    
-//     // If edit mode is activated via URL params
 //     if (editId && urlMode) {
 //       loadItemForEdit(editId, urlMode);
 //     }
 //   }, []);
-  
-//   // Fetch data when active mode changes
+
 //   useEffect(() => {
 //     fetchData();
 //   }, [activeMode]);
-  
-//   // Fetch categories whenever needed for category items form
+
 //   useEffect(() => {
 //     if (activeMode === 'categoryItems') {
 //       fetchCategories();
 //     }
 //   }, [activeMode]);
-  
-//   // Fetch data based on active mode
+
 //   const fetchData = async () => {
 //     switch(activeMode) {
 //       case 'trending':
@@ -127,88 +148,50 @@
 //         break;
 //       case 'categoryItems':
 //         fetchCategoryItems();
-//         fetchCategories(); // Need categories for the dropdown
+//         fetchCategories();
 //         break;
 //       default:
 //         fetchProducts();
 //     }
 //   };
-  
-//   // Load item for edit
+
 //   const loadItemForEdit = async (itemId, mode) => {
 //     try {
 //       setLoading(true);
 //       setFormMode('edit');
 //       setCurrentItemId(itemId);
-      
+
 //       let collectionName;
-      
 //       switch(mode) {
-//         case 'trending':
-//           collectionName = 'products';
-//           break;
-//         case 'categories':
-//           collectionName = 'categories';
-//           break;
-//         case 'categoryItems':
-//           collectionName = 'categoryItems';
-//           break;
-//         default:
-//           collectionName = 'products';
+//         case 'trending': collectionName = 'products'; break;
+//         case 'categories': collectionName = 'categories'; break;
+//         case 'categoryItems': collectionName = 'categoryItems'; break;
+//         default: collectionName = 'products';
 //       }
-      
+
 //       const itemDoc = await getDoc(doc(db, collectionName, itemId));
-      
 //       if (itemDoc.exists()) {
 //         const itemData = itemDoc.data();
-        
 //         switch(mode) {
 //           case 'trending':
-//             // Ensure project usages is an array with 4 elements
 //             let projectUsages = Array.isArray(itemData.projectUsages) ? [...itemData.projectUsages] : [];
-//             while (projectUsages.length < 4) {
-//               projectUsages.push('');
-//             }
-            
+//             while (projectUsages.length < 4) projectUsages.push('');
 //             setProductFormData({
-//               name: itemData.name || '',
-//               price: itemData.price || '',
-//               description: itemData.description || '',
-//               fullDescription: itemData.fullDescription || '',
-//               material: itemData.material || '',
-//               dimensions: itemData.dimensions || '',
-//               weight: itemData.weight || '',
-//               warranty: itemData.warranty || '',
+//               ...itemData,
 //               projectUsages,
-//               isQuick: itemData.isQuick !== undefined ? itemData.isQuick : true,
-//               active: itemData.active !== undefined ? itemData.active : true,
-//               imageUrl: itemData.imageUrl || ''
+//               price: itemData.price || ''
 //             });
 //             break;
 //           case 'categories':
-//             setCategoryFormData({
-//               name: itemData.name || '',
-//               description: itemData.description || '',
-//               active: itemData.active !== undefined ? itemData.active : true,
-//               imageUrl: itemData.imageUrl || ''
-//             });
+//             setCategoryFormData(itemData);
 //             break;
 //           case 'categoryItems':
 //             setCategoryItemFormData({
-//               categoryId: itemData.categoryId || '',
-//               categoryName: itemData.categoryName || '',
-//               name: itemData.name || '',
-//               price: itemData.price || '',
-//               description: itemData.description || '',
-//               fullDescription: itemData.fullDescription || '',
-//               material: itemData.material || '',
-//               dimensions: itemData.dimensions || '',
-//               active: itemData.active !== undefined ? itemData.active : true,
-//               imageUrl: itemData.imageUrl || ''
+//               ...itemData,
+//               price: itemData.price || ''
 //             });
 //             break;
 //         }
-        
 //         setImagePreview(itemData.imageUrl);
 //       }
 //     } catch (error) {
@@ -218,20 +201,13 @@
 //       setLoading(false);
 //     }
 //   };
-  
-//   // Fetch products from Firestore
+
 //   const fetchProducts = async () => {
 //     try {
 //       setLoading(true);
 //       const productsQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
 //       const querySnapshot = await getDocs(productsQuery);
-      
-//       const productsData = querySnapshot.docs.map(doc => ({
-//         id: doc.id,
-//         ...doc.data()
-//       }));
-      
-//       setProducts(productsData);
+//       setProducts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 //     } catch (error) {
 //       console.error('Error fetching products:', error);
 //       alert('Failed to load products. Please check your connection and try again.');
@@ -239,20 +215,13 @@
 //       setLoading(false);
 //     }
 //   };
-  
-//   // Fetch categories from Firestore
+
 //   const fetchCategories = async () => {
 //     try {
 //       setLoading(true);
 //       const categoriesQuery = query(collection(db, 'categories'), orderBy('createdAt', 'desc'));
 //       const querySnapshot = await getDocs(categoriesQuery);
-      
-//       const categoriesData = querySnapshot.docs.map(doc => ({
-//         id: doc.id,
-//         ...doc.data()
-//       }));
-      
-//       setCategories(categoriesData);
+//       setCategories(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 //     } catch (error) {
 //       console.error('Error fetching categories:', error);
 //       alert('Failed to load categories. Please check your connection and try again.');
@@ -260,20 +229,13 @@
 //       setLoading(false);
 //     }
 //   };
-  
-//   // Fetch category items from Firestore
+
 //   const fetchCategoryItems = async () => {
 //     try {
 //       setLoading(true);
 //       const categoryItemsQuery = query(collection(db, 'categoryItems'), orderBy('createdAt', 'desc'));
 //       const querySnapshot = await getDocs(categoryItemsQuery);
-      
-//       const categoryItemsData = querySnapshot.docs.map(doc => ({
-//         id: doc.id,
-//         ...doc.data()
-//       }));
-      
-//       setCategoryItems(categoryItemsData);
+//       setCategoryItems(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 //     } catch (error) {
 //       console.error('Error fetching category items:', error);
 //       alert('Failed to load category items. Please check your connection and try again.');
@@ -281,133 +243,67 @@
 //       setLoading(false);
 //     }
 //   };
-  
-//   // Handle product form input changes
+
 //   const handleProductInputChange = (e) => {
 //     const { name, value, type, checked } = e.target;
-    
-//     if (name === 'price') {
-//       // Ensure price is a valid number
-//       const numberValue = value === '' ? '' : parseFloat(value);
-//       if (!isNaN(numberValue) || value === '') {
-//         setProductFormData({
-//           ...productFormData,
-//           [name]: value === '' ? '' : numberValue
-//         });
-//       }
-//     } else {
-//       setProductFormData({
-//         ...productFormData,
-//         [name]: type === 'checkbox' ? checked : value
-//       });
-//     }
+//     setProductFormData(prev => ({
+//       ...prev,
+//       [name]: type === 'checkbox' ? checked : (name === 'price' && value !== '' ? parseFloat(value) : value)
+//     }));
 //   };
-  
-//   // Handle category form input changes
+
 //   const handleCategoryInputChange = (e) => {
 //     const { name, value, type, checked } = e.target;
-    
-//     setCategoryFormData({
-//       ...categoryFormData,
+//     setCategoryFormData(prev => ({
+//       ...prev,
 //       [name]: type === 'checkbox' ? checked : value
-//     });
+//     }));
 //   };
-  
-//   // Handle category item form input changes
+
 //   const handleCategoryItemInputChange = (e) => {
 //     const { name, value, type, checked } = e.target;
-    
-//     if (name === 'price') {
-//       // Ensure price is a valid number
-//       const numberValue = value === '' ? '' : parseFloat(value);
-//       if (!isNaN(numberValue) || value === '') {
-//         setCategoryItemFormData({
-//           ...categoryItemFormData,
-//           [name]: value === '' ? '' : numberValue
-//         });
-//       }
-//     } else if (name === 'categoryId') {
-//       // Update categoryName when categoryId changes
-//       const selectedCategory = categories.find(cat => cat.id === value);
-//       setCategoryItemFormData({
-//         ...categoryItemFormData,
-//         categoryId: value,
-//         categoryName: selectedCategory ? selectedCategory.name : ''
-//       });
-//     } else {
-//       setCategoryItemFormData({
-//         ...categoryItemFormData,
-//         [name]: type === 'checkbox' ? checked : value
-//       });
-//     }
+//     setCategoryItemFormData(prev => ({
+//       ...prev,
+//       [name]: type === 'checkbox' ? checked : (name === 'price' && value !== '' ? parseFloat(value) : value),
+//       ...(name === 'categoryId' && {
+//         categoryName: categories.find(cat => cat.id === value)?.name || ''
+//       })
+//     }));
 //   };
-  
-//   // Handle project usage changes
+
 //   const handleProjectUsageChange = (index, value) => {
-//     const updatedUsages = [...productFormData.projectUsages];
-//     updatedUsages[index] = value;
-//     setProductFormData({
-//       ...productFormData,
-//       projectUsages: updatedUsages
-//     });
+//     setProductFormData(prev => ({
+//       ...prev,
+//       projectUsages: prev.projectUsages.map((usage, i) => i === index ? value : usage)
+//     }));
 //   };
-  
-//   // Handle image selection
+
 //   const handleImageChange = (e) => {
 //     const file = e.target.files[0];
 //     if (file) {
-//       // Validate file type and size
-//       const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-//       const maxSize = 5 * 1024 * 1024; // 5MB
-      
-//       if (!validTypes.includes(file.type)) {
-//         alert('Please select a valid image file (JPEG, PNG, WEBP, or GIF)');
-//         return;
-//       }
-      
-//       if (file.size > maxSize) {
-//         alert('Image size should be less than 5MB');
-//         return;
-//       }
-      
 //       setImageFile(file);
-//       const previewUrl = URL.createObjectURL(file);
-//       setImagePreview(previewUrl);
+//       setImagePreview(URL.createObjectURL(file));
 //     }
 //   };
-  
-//   // Upload image to Firebase Storage
+
 //   const uploadImage = async () => {
 //     if (!imageFile) return null;
-    
 //     setIsUploading(true);
 //     setUploadProgress(0);
-    
 //     try {
-//       // Create a unique file path using timestamp and original filename
 //       const storageRef = ref(storage, `${activeMode}/${Date.now()}_${imageFile.name}`);
 //       const uploadTask = uploadBytesResumable(storageRef, imageFile);
-      
-//       return new Promise((resolve, reject) => {
-//         uploadTask.on(
-//           'state_changed',
-//           (snapshot) => {
-//             const progress = Math.round(
-//               (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-//             );
-//             setUploadProgress(progress);
-//           },
-//           (error) => {
-//             console.error('Error uploading image:', error);
-//             setIsUploading(false);
-//             reject(error);
-//           },
-//           async () => {
-//             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-//             setIsUploading(false);
-//             resolve(downloadURL);
-//           }
-//         );
+//       return new Promise((resolve) => {
+//         uploadTask.on('state_changed', (snapshot) => {
+//           setUploadProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
+//         }, (error) => {
+//           console.error('Error uploading image:', error);
+//           setIsUploading(false);
+//         }, async () => {
+//           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+//           setIsUploading(false);
+//           resolve(downloadURL);
+//         });
 //       });
 //     } catch (error) {
 //       console.error('Error in upload process:', error);
@@ -415,60 +311,31 @@
 //       return null;
 //     }
 //   };
-  
-//   // Delete image from Firebase Storage
+
 //   const deleteImage = async (imageUrl) => {
-//     if (!imageUrl || !imageUrl.startsWith('https://firebasestorage.googleapis.com')) return;
-    
-//     try {
-//       const imageRef = ref(storage, imageUrl);
-//       await deleteObject(imageRef);
-//     } catch (error) {
-//       console.error('Error deleting image:', error);
-//       // Continue with the process even if image deletion fails
+//     if (imageUrl && imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
+//       try {
+//         await deleteObject(ref(storage, imageUrl));
+//       } catch (error) {
+//         console.error('Error deleting image:', error);
+//       }
 //     }
 //   };
-  
-//   // Add new product
+
 //   const addProduct = async (e) => {
 //     e.preventDefault();
-    
-//     // Validate form
-//     if (productFormData.name.trim() === '') {
-//       alert('Please enter a product name');
-//       return;
-//     }
-    
-//     if (productFormData.price === '' || isNaN(productFormData.price)) {
-//       alert('Please enter a valid price');
-//       return;
-//     }
-    
+//     if (!productFormData.name.trim() || isNaN(productFormData.price)) return alert('Please enter valid product details');
 //     try {
-//       let imageUrl = productFormData.imageUrl;
-      
-//       if (imageFile) {
-//         imageUrl = await uploadImage();
-//         if (!imageUrl) {
-//           alert('Failed to upload image. Please try again.');
-//           return;
-//         }
-//       }
-      
-//       // Filter out empty project usages
-//       const filteredProjectUsages = productFormData.projectUsages.filter(usage => usage.trim() !== '');
-      
+//       let imageUrl = await uploadImage();
 //       const productData = {
 //         ...productFormData,
 //         price: parseFloat(productFormData.price),
-//         projectUsages: filteredProjectUsages,
-//         imageUrl,
+//         projectUsages: productFormData.projectUsages.filter(usage => usage.trim() !== ''),
+//         isQuick: productFormData.deliverySpeed === 'quick',
+//         imageUrl: imageUrl || productFormData.imageUrl,
 //         createdAt: serverTimestamp(),
 //         updatedAt: serverTimestamp()
 //       };
-      
-//       console.log("Adding new product with data:", productData);
-      
 //       await addDoc(collection(db, 'products'), productData);
 //       resetProductForm();
 //       fetchProducts();
@@ -478,56 +345,25 @@
 //       alert('Failed to add product. Please try again.');
 //     }
 //   };
-  
-//   // Update existing product
+
 //   const updateProduct = async (e) => {
 //     e.preventDefault();
-    
-//     if (!currentItemId) return;
-    
-//     // Validate form
-//     if (productFormData.name.trim() === '') {
-//       alert('Please enter a product name');
-//       return;
-//     }
-    
-//     if (productFormData.price === '' || isNaN(productFormData.price)) {
-//       alert('Please enter a valid price');
-//       return;
-//     }
-    
+//     if (!currentItemId || !productFormData.name.trim() || isNaN(productFormData.price)) return alert('Please enter valid product details');
 //     try {
 //       let imageUrl = productFormData.imageUrl;
-      
 //       if (imageFile) {
-//         // Delete old image if updating with new one
-//         if (imageUrl && imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-//           await deleteImage(imageUrl);
-//         }
-        
+//         await deleteImage(imageUrl);
 //         imageUrl = await uploadImage();
-//         if (!imageUrl) {
-//           alert('Failed to upload image. Please try again.');
-//           return;
-//         }
 //       }
-      
-//       // Filter out empty project usages
-//       const filteredProjectUsages = productFormData.projectUsages.filter(usage => usage.trim() !== '');
-      
 //       const productData = {
 //         ...productFormData,
 //         price: parseFloat(productFormData.price),
-//         projectUsages: filteredProjectUsages,
-//         imageUrl,
+//         projectUsages: productFormData.projectUsages.filter(usage => usage.trim() !== ''),
+//         isQuick: productFormData.deliverySpeed === 'quick',
+//         imageUrl: imageUrl || productFormData.imageUrl,
 //         updatedAt: serverTimestamp()
 //       };
-      
-//       console.log("Updating product with data:", productData);
-      
-//       const productRef = doc(db, 'products', currentItemId);
-//       await updateDoc(productRef, productData);
-      
+//       await updateDoc(doc(db, 'products', currentItemId), productData);
 //       resetProductForm();
 //       fetchProducts();
 //       alert('Product updated successfully!');
@@ -536,37 +372,18 @@
 //       alert('Failed to update product. Please try again.');
 //     }
 //   };
-  
-//   // Add new category
+
 //   const addCategory = async (e) => {
 //     e.preventDefault();
-    
-//     // Validate form
-//     if (categoryFormData.name.trim() === '') {
-//       alert('Please enter a category name');
-//       return;
-//     }
-    
+//     if (!categoryFormData.name.trim()) return alert('Please enter a category name');
 //     try {
-//       let imageUrl = categoryFormData.imageUrl;
-      
-//       if (imageFile) {
-//         imageUrl = await uploadImage();
-//         if (!imageUrl) {
-//           alert('Failed to upload image. Please try again.');
-//           return;
-//         }
-//       }
-      
+//       let imageUrl = await uploadImage();
 //       const categoryData = {
 //         ...categoryFormData,
-//         imageUrl,
+//         imageUrl: imageUrl || categoryFormData.imageUrl,
 //         createdAt: serverTimestamp(),
 //         updatedAt: serverTimestamp()
 //       };
-      
-//       console.log("Adding new category with data:", categoryData);
-      
 //       await addDoc(collection(db, 'categories'), categoryData);
 //       resetCategoryForm();
 //       fetchCategories();
@@ -576,60 +393,28 @@
 //       alert('Failed to add category. Please try again.');
 //     }
 //   };
-  
-//   // Update existing category
+
 //   const updateCategory = async (e) => {
 //     e.preventDefault();
-    
-//     if (!currentItemId) return;
-    
-//     // Validate form
-//     if (categoryFormData.name.trim() === '') {
-//       alert('Please enter a category name');
-//       return;
-//     }
-    
+//     if (!currentItemId || !categoryFormData.name.trim()) return alert('Please enter a category name');
 //     try {
 //       let imageUrl = categoryFormData.imageUrl;
-      
 //       if (imageFile) {
-//         // Delete old image if updating with new one
-//         if (imageUrl && imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-//           await deleteImage(imageUrl);
-//         }
-        
+//         await deleteImage(imageUrl);
 //         imageUrl = await uploadImage();
-//         if (!imageUrl) {
-//           alert('Failed to upload image. Please try again.');
-//           return;
-//         }
 //       }
-      
 //       const categoryData = {
 //         ...categoryFormData,
-//         imageUrl,
+//         imageUrl: imageUrl || categoryFormData.imageUrl,
 //         updatedAt: serverTimestamp()
 //       };
-      
-//       console.log("Updating category with data:", categoryData);
-      
 //       const categoryRef = doc(db, 'categories', currentItemId);
 //       await updateDoc(categoryRef, categoryData);
-      
-//       // Update category name in all associated category items
 //       const batch = writeBatch(db);
 //       const categoryItemsQuery = query(collection(db, 'categoryItems'), where('categoryId', '==', currentItemId));
 //       const categoryItemsSnapshot = await getDocs(categoryItemsQuery);
-      
-//       categoryItemsSnapshot.docs.forEach(doc => {
-//         batch.update(doc.ref, { 
-//           categoryName: categoryFormData.name,
-//           updatedAt: serverTimestamp()
-//         });
-//       });
-      
+//       categoryItemsSnapshot.docs.forEach(doc => batch.update(doc.ref, { categoryName: categoryFormData.name, updatedAt: serverTimestamp() }));
 //       await batch.commit();
-      
 //       resetCategoryForm();
 //       fetchCategories();
 //       alert('Category updated successfully!');
@@ -638,48 +423,20 @@
 //       alert('Failed to update category. Please try again.');
 //     }
 //   };
-  
-//   // Add new category item
+
 //   const addCategoryItem = async (e) => {
 //     e.preventDefault();
-    
-//     // Validate form
-//     if (categoryItemFormData.name.trim() === '') {
-//       alert('Please enter an item name');
-//       return;
-//     }
-    
-//     if (categoryItemFormData.price === '' || isNaN(categoryItemFormData.price)) {
-//       alert('Please enter a valid price');
-//       return;
-//     }
-    
-//     if (!categoryItemFormData.categoryId) {
-//       alert('Please select a category');
-//       return;
-//     }
-    
+//     if (!categoryItemFormData.name.trim() || isNaN(categoryItemFormData.price) || !categoryItemFormData.categoryId) return alert('Please enter valid item details');
 //     try {
-//       let imageUrl = categoryItemFormData.imageUrl;
-      
-//       if (imageFile) {
-//         imageUrl = await uploadImage();
-//         if (!imageUrl) {
-//           alert('Failed to upload image. Please try again.');
-//           return;
-//         }
-//       }
-      
+//       let imageUrl = await uploadImage();
 //       const categoryItemData = {
 //         ...categoryItemFormData,
 //         price: parseFloat(categoryItemFormData.price),
-//         imageUrl,
+//         isQuick: categoryItemFormData.deliverySpeed === 'quick',
+//         imageUrl: imageUrl || categoryItemFormData.imageUrl,
 //         createdAt: serverTimestamp(),
 //         updatedAt: serverTimestamp()
 //       };
-      
-//       console.log("Adding new category item with data:", categoryItemData);
-      
 //       await addDoc(collection(db, 'categoryItems'), categoryItemData);
 //       resetCategoryItemForm();
 //       fetchCategoryItems();
@@ -689,57 +446,24 @@
 //       alert('Failed to add category item. Please try again.');
 //     }
 //   };
-  
-//   // Update existing category item
+
 //   const updateCategoryItem = async (e) => {
 //     e.preventDefault();
-    
-//     if (!currentItemId) return;
-    
-//     // Validate form
-//     if (categoryItemFormData.name.trim() === '') {
-//       alert('Please enter an item name');
-//       return;
-//     }
-    
-//     if (categoryItemFormData.price === '' || isNaN(categoryItemFormData.price)) {
-//       alert('Please enter a valid price');
-//       return;
-//     }
-    
-//     if (!categoryItemFormData.categoryId) {
-//       alert('Please select a category');
-//       return;
-//     }
-    
+//     if (!currentItemId || !categoryItemFormData.name.trim() || isNaN(categoryItemFormData.price) || !categoryItemFormData.categoryId) return alert('Please enter valid item details');
 //     try {
 //       let imageUrl = categoryItemFormData.imageUrl;
-      
 //       if (imageFile) {
-//         // Delete old image if updating with new one
-//         if (imageUrl && imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-//           await deleteImage(imageUrl);
-//         }
-        
+//         await deleteImage(imageUrl);
 //         imageUrl = await uploadImage();
-//         if (!imageUrl) {
-//           alert('Failed to upload image. Please try again.');
-//           return;
-//         }
 //       }
-      
 //       const categoryItemData = {
 //         ...categoryItemFormData,
 //         price: parseFloat(categoryItemFormData.price),
-//         imageUrl,
+//         isQuick: categoryItemFormData.deliverySpeed === 'quick',
+//         imageUrl: imageUrl || categoryItemFormData.imageUrl,
 //         updatedAt: serverTimestamp()
 //       };
-      
-//       console.log("Updating category item with data:", categoryItemData);
-      
-//       const categoryItemRef = doc(db, 'categoryItems', currentItemId);
-//       await updateDoc(categoryItemRef, categoryItemData);
-      
+//       await updateDoc(doc(db, 'categoryItems', currentItemId), categoryItemData);
 //       resetCategoryItemForm();
 //       fetchCategoryItems();
 //       alert('Category item updated successfully!');
@@ -748,153 +472,67 @@
 //       alert('Failed to update category item. Please try again.');
 //     }
 //   };
-  
-//   // Delete item
+
 //   const handleDeleteItem = async (itemId, imageUrl, itemType) => {
-//     const itemTypeName = 
-//       itemType === 'trending' ? 'product' : 
-//       itemType === 'categories' ? 'category' : 
-//       'category item';
-    
-//     if (window.confirm(`Are you sure you want to delete this ${itemTypeName}?`)) {
+//     if (window.confirm(`Are you sure you want to delete this ${itemType === 'trending' ? 'product' : itemType === 'categories' ? 'category' : 'category item'}?`)) {
 //       try {
-//         // If deleting a category, check if it has items
 //         if (itemType === 'categories') {
 //           const categoryItemsQuery = query(collection(db, 'categoryItems'), where('categoryId', '==', itemId));
 //           const categoryItemsSnapshot = await getDocs(categoryItemsQuery);
-          
 //           if (!categoryItemsSnapshot.empty) {
-//             if (!window.confirm(`This category has ${categoryItemsSnapshot.size} items. Deleting it will also delete all associated items. Continue?`)) {
-//               return;
-//             }
-            
-//             // Delete all associated category items
+//             if (!window.confirm(`This category has ${categoryItemsSnapshot.size} items. Deleting it will also delete all associated items. Continue?`)) return;
 //             const batch = writeBatch(db);
 //             categoryItemsSnapshot.docs.forEach(doc => {
 //               batch.delete(doc.ref);
-              
-//               // Delete category item images
-//               const itemImageUrl = doc.data().imageUrl;
-//               if (itemImageUrl && itemImageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-//                 deleteImage(itemImageUrl);
-//               }
+//               deleteImage(doc.data().imageUrl);
 //             });
-            
 //             await batch.commit();
 //           }
 //         }
-        
-//         // Delete item document from Firestore
-//         const collectionName = 
-//           itemType === 'trending' ? 'products' : 
-//           itemType === 'categories' ? 'categories' : 
-//           'categoryItems';
-        
-//         await deleteDoc(doc(db, collectionName, itemId));
-        
-//         // Delete item image from Storage if it's a Firebase Storage URL
-//         if (imageUrl && imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-//           await deleteImage(imageUrl);
-//         }
-        
-//         // Refresh the appropriate list
-//         if (itemType === 'trending') {
-//           fetchProducts();
-//         } else if (itemType === 'categories') {
-//           fetchCategories();
-//         } else {
-//           fetchCategoryItems();
-//         }
-        
-//         alert(`${itemTypeName.charAt(0).toUpperCase() + itemTypeName.slice(1)} deleted successfully!`);
+//         await deleteDoc(doc(db, itemType === 'trending' ? 'products' : itemType === 'categories' ? 'categories' : 'categoryItems', itemId));
+//         await deleteImage(imageUrl);
+//         if (itemType === 'trending') fetchProducts();
+//         else if (itemType === 'categories') fetchCategories();
+//         else fetchCategoryItems();
+//         alert(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} deleted successfully!`);
 //       } catch (error) {
-//         console.error(`Error deleting ${itemTypeName}:`, error);
-//         alert(`Failed to delete ${itemTypeName}. Please try again.`);
+//         console.error(`Error deleting ${itemType}:`, error);
+//         alert(`Failed to delete ${itemType}. Please try again.`);
 //       }
 //     }
 //   };
-  
-//   // Toggle item active status
+
 //   const toggleItemStatus = async (itemId, currentStatus, itemType) => {
 //     try {
-//       const collectionName = 
-//         itemType === 'trending' ? 'products' : 
-//         itemType === 'categories' ? 'categories' : 
-//         'categoryItems';
-      
-//       const itemRef = doc(db, collectionName, itemId);
-//       await updateDoc(itemRef, {
+//       await updateDoc(doc(db, itemType === 'trending' ? 'products' : itemType === 'categories' ? 'categories' : 'categoryItems', itemId), {
 //         active: !currentStatus,
 //         updatedAt: serverTimestamp()
 //       });
-      
-//       // Refresh the appropriate list
-//       if (itemType === 'trending') {
-//         fetchProducts();
-//       } else if (itemType === 'categories') {
-//         fetchCategories();
-//       } else {
-//         fetchCategoryItems();
-//       }
+//       if (itemType === 'trending') fetchProducts();
+//       else if (itemType === 'categories') fetchCategories();
+//       else fetchCategoryItems();
 //     } catch (error) {
 //       console.error('Error toggling item status:', error);
 //       alert('Failed to update item status. Please try again.');
 //     }
 //   };
-  
-//   // Edit item (load data into form)
+
 //   const handleEditItem = (item, itemType) => {
 //     setFormMode('edit');
 //     setCurrentItemId(item.id);
-    
 //     if (itemType === 'trending') {
-//       // Ensure project usages is an array with 4 elements
 //       let projectUsages = Array.isArray(item.projectUsages) ? [...item.projectUsages] : [];
-//       while (projectUsages.length < 4) {
-//         projectUsages.push('');
-//       }
-      
-//       setProductFormData({
-//         name: item.name || '',
-//         price: item.price || '',
-//         description: item.description || '',
-//         fullDescription: item.fullDescription || '',
-//         material: item.material || '',
-//         dimensions: item.dimensions || '',
-//         weight: item.weight || '',
-//         warranty: item.warranty || '',
-//         projectUsages,
-//         isQuick: item.isQuick !== undefined ? item.isQuick : true,
-//         active: item.active !== undefined ? item.active : true,
-//         imageUrl: item.imageUrl || ''
-//       });
+//       while (projectUsages.length < 4) projectUsages.push('');
+//       setProductFormData({ ...item, projectUsages });
 //     } else if (itemType === 'categories') {
-//       setCategoryFormData({
-//         name: item.name || '',
-//         description: item.description || '',
-//         active: item.active !== undefined ? item.active : true,
-//         imageUrl: item.imageUrl || ''
-//       });
+//       setCategoryFormData(item);
 //     } else {
-//       setCategoryItemFormData({
-//         categoryId: item.categoryId || '',
-//         categoryName: item.categoryName || '',
-//         name: item.name || '',
-//         price: item.price || '',
-//         description: item.description || '',
-//         fullDescription: item.fullDescription || '',
-//         material: item.material || '',
-//         dimensions: item.dimensions || '',
-//         active: item.active !== undefined ? item.active : true,
-//         imageUrl: item.imageUrl || ''
-//       });
+//       setCategoryItemFormData(item);
 //     }
-    
 //     setImagePreview(item.imageUrl);
 //     window.scrollTo({ top: 0, behavior: 'smooth' });
 //   };
-  
-//   // Reset product form
+
 //   const resetProductForm = () => {
 //     setFormMode('add');
 //     setCurrentItemId(null);
@@ -906,18 +544,34 @@
 //       price: '',
 //       description: '',
 //       fullDescription: '',
-//       material: '',
+//       microcontroller: '',
+//       operatingVoltage: '',
+//       inputVoltageRecommended: '',
+//       inputVoltageLimits: '',
+//       digitalIOPins: '',
+//       analogInputPins: '',
+//       pwmChannels: '',
+//       clockSpeed: '',
+//       flashMemory: '',
+//       sram: '',
+//       eeprom: '',
+//       usbInterface: '',
+//       communicationInterfaces: '',
 //       dimensions: '',
 //       weight: '',
+//       operatingTemperature: '',
+//       powerConsumption: '',
+//       ledIndicators: '',
+//       material: '',
 //       warranty: '',
 //       projectUsages: ['', '', '', ''],
+//       deliverySpeed: 'normal',
 //       isQuick: true,
 //       active: true,
 //       imageUrl: ''
 //     });
 //   };
-  
-//   // Reset category form
+
 //   const resetCategoryForm = () => {
 //     setFormMode('add');
 //     setCurrentItemId(null);
@@ -931,8 +585,7 @@
 //       imageUrl: ''
 //     });
 //   };
-  
-//   // Reset category item form
+
 //   const resetCategoryItemForm = () => {
 //     setFormMode('add');
 //     setCurrentItemId(null);
@@ -946,800 +599,547 @@
 //       price: '',
 //       description: '',
 //       fullDescription: '',
-//       material: '',
+//       microcontroller: '',
+//       operatingVoltage: '',
+//       inputVoltageRecommended: '',
+//       inputVoltageLimits: '',
+//       digitalIOPins: '',
+//       analogInputPins: '',
+//       pwmChannels: '',
+//       clockSpeed: '',
+//       flashMemory: '',
+//       sram: '',
+//       eeprom: '',
+//       usbInterface: '',
+//       communicationInterfaces: '',
 //       dimensions: '',
+//       weight: '',
+//       operatingTemperature: '',
+//       powerConsumption: '',
+//       ledIndicators: '',
+//       material: '',
+//       warranty: '',
+//       deliverySpeed: 'normal',
 //       active: true,
 //       imageUrl: ''
 //     });
 //   };
-  
-//   // Reset form based on active mode
+
 //   const resetForm = () => {
 //     switch(activeMode) {
-//       case 'trending':
-//         resetProductForm();
-//         break;
-//       case 'categories':
-//         resetCategoryForm();
-//         break;
-//       case 'categoryItems':
-//         resetCategoryItemForm();
-//         break;
-//       default:
-//         resetProductForm();
+//       case 'trending': resetProductForm(); break;
+//       case 'categories': resetCategoryForm(); break;
+//       case 'categoryItems': resetCategoryItemForm(); break;
+//       default: resetProductForm();
 //     }
 //   };
-  
-//   // Handle form submission
+
 //   const handleFormSubmit = (e) => {
+//     e.preventDefault();
 //     switch(activeMode) {
-//       case 'trending':
-//         if (formMode === 'add') {
-//           addProduct(e);
-//         } else {
-//           updateProduct(e);
-//         }
-//         break;
-//       case 'categories':
-//         if (formMode === 'add') {
-//           addCategory(e);
-//         } else {
-//           updateCategory(e);
-//         }
-//         break;
-//       case 'categoryItems':
-//         if (formMode === 'add') {
-//           addCategoryItem(e);
-//         } else {
-//           updateCategoryItem(e);
-//         }
-//         break;
-//       default:
-//         addProduct(e);
+//       case 'trending': formMode === 'add' ? addProduct(e) : updateProduct(e); break;
+//       case 'categories': formMode === 'add' ? addCategory(e) : updateCategory(e); break;
+//       case 'categoryItems': formMode === 'add' ? addCategoryItem(e) : updateCategoryItem(e); break;
+//       default: addProduct(e);
 //     }
 //   };
-  
-//   // Change active management mode
+
 //   const changeMode = (mode) => {
 //     resetForm();
 //     setActiveMode(mode);
-    
-//     // Update URL without navigation
 //     const url = new URL(window.location);
 //     url.searchParams.set('mode', mode);
 //     window.history.pushState({}, '', url);
 //   };
-  
-//   // View all items button click handler
-//   const handleViewAllItems = () => {
-//     navigate('/manage-items');
-//   };
-  
+
+//   const handleViewAllItems = () => navigate('/manage-items');
+
 //   return (
 //     <div className="content">
 //       <h1 className="page-title">Create Items</h1>
-      
-//       {/* Navigation Tabs */}
 //       <div className="management-tabs">
-//         <button 
-//           className={`tab-btn ${activeMode === 'trending' ? 'active' : ''}`}
-//           onClick={() => changeMode('trending')}
-//         >
+//         <button className={`tab-btn ${activeMode === 'trending' ? 'active' : ''}`} onClick={() => changeMode('trending')}>
 //           Create Trending Components
 //         </button>
-//         <button 
-//           className={`tab-btn ${activeMode === 'categories' ? 'active' : ''}`}
-//           onClick={() => changeMode('categories')}
-//         >
+//         <button className={`tab-btn ${activeMode === 'categories' ? 'active' : ''}`} onClick={() => changeMode('categories')}>
 //           Create Categories
 //         </button>
-//         <button 
-//           className={`tab-btn ${activeMode === 'categoryItems' ? 'active' : ''}`}
-//           onClick={() => changeMode('categoryItems')}
-//         >
+//         <button className={`tab-btn ${activeMode === 'categoryItems' ? 'active' : ''}`} onClick={() => changeMode('categoryItems')}>
 //           Create Category Items
 //         </button>
 //       </div>
-      
-//       {/* Product Form */}
+
 //       {activeMode === 'trending' && (
 //         <div className="card form-card">
 //           <h2>{formMode === 'add' ? 'Add New Trending Component' : 'Edit Trending Component'}</h2>
-          
 //           <form onSubmit={handleFormSubmit}>
 //             <div className="form-section">
 //               <h3>Basic Information</h3>
-              
 //               <div className="form-group">
 //                 <label>Product Name</label>
-//                 <input
-//                   type="text"
-//                   name="name"
-//                   value={productFormData.name}
-//                   onChange={handleProductInputChange}
-//                   placeholder="Arduino Uno R3"
-//                   required
-//                 />
+//                 <input type="text" name="name" value={productFormData.name} onChange={handleProductInputChange} placeholder="Arduino Uno R3" required />
 //               </div>
-              
 //               <div className="form-group">
 //                 <label>Price (₹)</label>
-//                 <input
-//                   type="number"
-//                   name="price"
-//                   value={productFormData.price}
-//                   onChange={handleProductInputChange}
-//                   placeholder="450"
-//                   step="0.01"
-//                   min="0"
-//                   required
-//                 />
+//                 <input type="number" name="price" value={productFormData.price} onChange={handleProductInputChange} placeholder="450" step="0.01" min="0" required />
 //               </div>
-              
 //               <div className="form-group">
 //                 <label>Short Description</label>
-//                 <textarea
-//                   name="description"
-//                   value={productFormData.description}
-//                   onChange={handleProductInputChange}
-//                   placeholder="The Arduino Uno is an open-source microcontroller board based on the ATmega328P."
-//                   rows="2"
-//                   required
-//                 />
+//                 <textarea name="description" value={productFormData.description} onChange={handleProductInputChange} placeholder="The Arduino Uno is an open-source microcontroller board..." rows="2" required />
 //               </div>
-              
 //               <div className="form-group">
 //                 <label>Full Description</label>
-//                 <textarea
-//                   name="fullDescription"
-//                   value={productFormData.fullDescription}
-//                   onChange={handleProductInputChange}
-//                   placeholder="Detailed product description that will appear in the product details modal..."
-//                   rows="4"
-//                 />
+//                 <textarea name="fullDescription" value={productFormData.fullDescription} onChange={handleProductInputChange} placeholder="Detailed product description..." rows="4" />
 //               </div>
 //             </div>
-            
-//             <div className="form-section">
-//               <h3>Product Image</h3>
-              
-//               <div className="form-group">
-//                 <label>Product Image</label>
-//                 <input
-//                   type="file"
-//                   accept="image/jpeg,image/png,image/webp,image/gif"
-//                   onChange={handleImageChange}
-//                 />
-                
-//                 {isUploading && (
-//                   <div className="upload-progress">
-//                     <div 
-//                       className="progress-bar" 
-//                       style={{ width: `${uploadProgress}%` }}
-//                     ></div>
-//                     <span>{uploadProgress}%</span>
-//                   </div>
-//                 )}
-                
-//                 {imagePreview && (
-//                   <div className="image-preview">
-//                     <img src={imagePreview} alt="Product Preview" />
-//                   </div>
-//                 )}
-//               </div>
-//             </div>
-            
 //             <div className="form-section">
 //               <h3>Specifications</h3>
-              
 //               <div className="form-row">
 //                 <div className="form-group half">
-//                   <label>Material</label>
-//                   <input
-//                     type="text"
-//                     name="material"
-//                     value={productFormData.material}
-//                     onChange={handleProductInputChange}
-//                     placeholder="High-quality composite"
-//                   />
+//                   <label>Microcontroller</label>
+//                   <input type="text" name="microcontroller" value={productFormData.microcontroller} onChange={handleProductInputChange} placeholder="ATmega328P" />
 //                 </div>
-                
 //                 <div className="form-group half">
-//                   <label>Dimensions</label>
-//                   <input
-//                     type="text"
-//                     name="dimensions"
-//                     value={productFormData.dimensions}
-//                     onChange={handleProductInputChange}
-//                     placeholder="30cm x 20cm x 10cm"
-//                   />
+//                   <label>Operating Voltage</label>
+//                   <input type="text" name="operatingVoltage" value={productFormData.operatingVoltage} onChange={handleProductInputChange} placeholder="5V" />
 //                 </div>
 //               </div>
-              
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Input Voltage (Recommended)</label>
+//                   <input type="text" name="inputVoltageRecommended" value={productFormData.inputVoltageRecommended} onChange={handleProductInputChange} placeholder="7-12V" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>Input Voltage (Limits)</label>
+//                   <input type="text" name="inputVoltageLimits" value={productFormData.inputVoltageLimits} onChange={handleProductInputChange} placeholder="6-20V" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Digital I/O Pins</label>
+//                   <input type="text" name="digitalIOPins" value={productFormData.digitalIOPins} onChange={handleProductInputChange} placeholder="14 (6 PWM)" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>Analog Input Pins</label>
+//                   <input type="text" name="analogInputPins" value={productFormData.analogInputPins} onChange={handleProductInputChange} placeholder="8 (A0 to A7)" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>PWM Channels</label>
+//                   <input type="text" name="pwmChannels" value={productFormData.pwmChannels} onChange={handleProductInputChange} placeholder="6" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>Clock Speed</label>
+//                   <input type="text" name="clockSpeed" value={productFormData.clockSpeed} onChange={handleProductInputChange} placeholder="16 MHz" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Flash Memory</label>
+//                   <input type="text" name="flashMemory" value={productFormData.flashMemory} onChange={handleProductInputChange} placeholder="32 KB" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>SRAM</label>
+//                   <input type="text" name="sram" value={productFormData.sram} onChange={handleProductInputChange} placeholder="2 KB" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>EEPROM</label>
+//                   <input type="text" name="eeprom" value={productFormData.eeprom} onChange={handleProductInputChange} placeholder="1 KB" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>USB Interface</label>
+//                   <input type="text" name="usbInterface" value={productFormData.usbInterface} onChange={handleProductInputChange} placeholder="Mini USB" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Communication Interfaces</label>
+//                   <input type="text" name="communicationInterfaces" value={productFormData.communicationInterfaces} onChange={handleProductInputChange} placeholder="UART, SPI, I2C" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>Dimensions</label>
+//                   <input type="text" name="dimensions" value={productFormData.dimensions} onChange={handleProductInputChange} placeholder="45mm x 18mm" />
+//                 </div>
+//               </div>
 //               <div className="form-row">
 //                 <div className="form-group half">
 //                   <label>Weight</label>
-//                   <input
-//                     type="text"
-//                     name="weight"
-//                     value={productFormData.weight}
-//                     onChange={handleProductInputChange}
-//                     placeholder="250g"
-//                   />
+//                   <input type="text" name="weight" value={productFormData.weight} onChange={handleProductInputChange} placeholder="7 grams" />
 //                 </div>
-                
 //                 <div className="form-group half">
-//                   <label>Warranty</label>
-//                   <input
-//                     type="text"
-//                     name="warranty"
-//                     value={productFormData.warranty}
-//                     onChange={handleProductInputChange}
-//                     placeholder="1 year manufacturer warranty"
-//                   />
+//                   <label>Operating Temperature</label>
+//                   <input type="text" name="operatingTemperature" value={productFormData.operatingTemperature} onChange={handleProductInputChange} placeholder="-40°C to 85°C" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Power Consumption</label>
+//                   <input type="text" name="powerConsumption" value={productFormData.powerConsumption} onChange={handleProductInputChange} placeholder="Low power with sleep modes" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>LED Indicators</label>
+//                   <input type="text" name="ledIndicators" value={productFormData.ledIndicators} onChange={handleProductInputChange} placeholder="Power LED, TX/RX LEDs" />
 //                 </div>
 //               </div>
 //             </div>
-            
+//             <div className="form-section">
+//               <h3>Product Image</h3>
+//               <div className="form-group">
+//                 <label>Product Image</label>
+//                 <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageChange} />
+//                 {isUploading && <div className="upload-progress"><div className="progress-bar" style={{ width: `${uploadProgress}%` }}></div><span>{uploadProgress}%</span></div>}
+//                 {imagePreview && <div className="image-preview"><img src={imagePreview} alt="Product Preview" /></div>}
+//               </div>
+//             </div>
 //             <div className="form-section">
 //               <h3>Project Usages</h3>
-              
 //               {productFormData.projectUsages.map((usage, index) => (
 //                 <div className="form-group" key={index}>
 //                   <label>Usage {index + 1}</label>
-//                   <input
-//                     type="text"
-//                     value={usage}
-//                     onChange={(e) => handleProjectUsageChange(index, e.target.value)}
-//                     placeholder={`Project usage example ${index + 1}`}
-//                   />
+//                   <input type="text" value={usage} onChange={(e) => handleProjectUsageChange(index, e.target.value)} placeholder={`Project usage example ${index + 1}`} />
 //                 </div>
 //               ))}
 //             </div>
-            
 //             <div className="form-section">
 //               <h3>Display Options</h3>
-              
 //               <div className="form-group">
-//                 <div className="checkbox-container">
-//                   <input
-//                     type="checkbox"
-//                     name="isQuick"
-//                     id="isQuick"
-//                     checked={productFormData.isQuick}
-//                     onChange={handleProductInputChange}
-//                   />
-//                   <label htmlFor="isQuick">Show "Quick" badge</label>
+//                 <label>Delivery Speed</label>
+//                 <div className="delivery-speed-options">
+//                   {['quick', 'normal', 'late'].map(speed => (
+//                     <label className="radio-container" key={speed}>
+//                       <input type="radio" name="deliverySpeed" value={speed} checked={productFormData.deliverySpeed === speed} onChange={handleProductInputChange} />
+//                       <span className="radio-label">{speed.charAt(0).toUpperCase() + speed.slice(1)}</span>
+//                     </label>
+//                   ))}
 //                 </div>
 //               </div>
-              
 //               <div className="form-group">
 //                 <div className="checkbox-container">
-//                   <input
-//                     type="checkbox"
-//                     name="active"
-//                     id="active"
-//                     checked={productFormData.active}
-//                     onChange={handleProductInputChange}
-//                   />
+//                   <input type="checkbox" name="active" id="active" checked={productFormData.active} onChange={handleProductInputChange} />
 //                   <label htmlFor="active">Active (visible on website)</label>
 //                 </div>
 //               </div>
 //             </div>
-            
 //             <div className="form-actions">
-//               <button 
-//                 type="button" 
-//                 className="cancel-btn" 
-//                 onClick={resetForm}
-//               >
-//                 Cancel
-//               </button>
-              
-//               <button 
-//                 type="submit" 
-//                 className="submit-btn"
-//                 disabled={isUploading}
-//               >
-//                 {formMode === 'add' ? 'Add Product' : 'Update Product'}
-//               </button>
+//               <button type="button" className="cancel-btn" onClick={resetForm}>Cancel</button>
+//               <button type="submit" className="submit-btn" disabled={isUploading}>{formMode === 'add' ? 'Add Product' : 'Update Product'}</button>
 //             </div>
 //           </form>
+//           {formMode === 'edit' && <SpecificationComponent itemData={productFormData} itemType="trending" />}
 //         </div>
 //       )}
-      
-//       {/* Category Form */}
+
 //       {activeMode === 'categories' && (
 //         <div className="card form-card">
 //           <h2>{formMode === 'add' ? 'Add New Category' : 'Edit Category'}</h2>
-          
 //           <form onSubmit={handleFormSubmit}>
 //             <div className="form-section">
 //               <h3>Basic Information</h3>
-              
 //               <div className="form-group">
 //                 <label>Category Name</label>
-//                 <input
-//                   type="text"
-//                   name="name"
-//                   value={categoryFormData.name}
-//                   onChange={handleCategoryInputChange}
-//                   placeholder="Microcontrollers"
-//                   required
-//                 />
+//                 <input type="text" name="name" value={categoryFormData.name} onChange={handleCategoryInputChange} placeholder="Microcontrollers" required />
 //               </div>
-              
 //               <div className="form-group">
 //                 <label>Description</label>
-//                 <textarea
-//                   name="description"
-//                   value={categoryFormData.description}
-//                   onChange={handleCategoryInputChange}
-//                   placeholder="A collection of microcontroller boards and related components."
-//                   rows="3"
-//                 />
+//                 <textarea name="description" value={categoryFormData.description} onChange={handleCategoryInputChange} placeholder="A collection of microcontroller boards..." rows="3" />
 //               </div>
-              
 //               <div className="form-group">
 //                 <div className="checkbox-container">
-//                   <input
-//                     type="checkbox"
-//                     name="active"
-//                     id="categoryActive"
-//                     checked={categoryFormData.active}
-//                     onChange={handleCategoryInputChange}
-//                   />
+//                   <input type="checkbox" name="active" id="categoryActive" checked={categoryFormData.active} onChange={handleCategoryInputChange} />
 //                   <label htmlFor="categoryActive">Active (visible on website)</label>
 //                 </div>
 //               </div>
 //             </div>
-            
 //             <div className="form-section">
 //               <h3>Category Image</h3>
-              
 //               <div className="form-group">
 //                 <label>Category Image</label>
-//                 <input
-//                   type="file"
-//                   accept="image/jpeg,image/png,image/webp,image/gif"
-//                   onChange={handleImageChange}
-//                 />
-                
-//                 {isUploading && (
-//                   <div className="upload-progress">
-//                     <div 
-//                       className="progress-bar" 
-//                       style={{ width: `${uploadProgress}%` }}
-//                     ></div>
-//                     <span>{uploadProgress}%</span>
-//                   </div>
-//                 )}
-                
-//                 {imagePreview && (
-//                   <div className="image-preview">
-//                     <img src={imagePreview} alt="Category Preview" />
-//                   </div>
-//                 )}
+//                 <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageChange} />
+//                 {isUploading && <div className="upload-progress"><div className="progress-bar" style={{ width: `${uploadProgress}%` }}></div><span>{uploadProgress}%</span></div>}
+//                 {imagePreview && <div className="image-preview"><img src={imagePreview} alt="Category Preview" /></div>}
 //               </div>
 //             </div>
-            
 //             <div className="form-actions">
-//               <button 
-//                 type="button" 
-//                 className="cancel-btn" 
-//                 onClick={resetForm}
-//               >
-//                 Cancel
-//               </button>
-              
-//               <button 
-//                 type="submit" 
-//                 className="submit-btn"
-//                 disabled={isUploading}
-//               >
-//                 {formMode === 'add' ? 'Add Category' : 'Update Category'}
-//               </button>
+//               <button type="button" className="cancel-btn" onClick={resetForm}>Cancel</button>
+//               <button type="submit" className="submit-btn" disabled={isUploading}>{formMode === 'add' ? 'Add Category' : 'Update Category'}</button>
 //             </div>
 //           </form>
 //         </div>
 //       )}
-      
-//       {/* Category Item Form */}
+
 //       {activeMode === 'categoryItems' && (
 //         <div className="card form-card">
 //           <h2>{formMode === 'add' ? 'Add New Category Item' : 'Edit Category Item'}</h2>
-          
 //           <form onSubmit={handleFormSubmit}>
 //             <div className="form-section">
 //               <h3>Category Selection</h3>
-              
 //               <div className="form-group">
 //                 <label>Select Category</label>
-//                 <select
-//                   name="categoryId"
-//                   value={categoryItemFormData.categoryId}
-//                   onChange={handleCategoryItemInputChange}
-//                   required
-//                 >
+//                 <select name="categoryId" value={categoryItemFormData.categoryId} onChange={handleCategoryItemInputChange} required>
 //                   <option value="">-- Select a Category --</option>
-//                   {categories.map(category => (
-//                     <option key={category.id} value={category.id}>
-//                       {category.name}
-//                     </option>
-//                   ))}
+//                   {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
 //                 </select>
 //               </div>
 //             </div>
-            
 //             <div className="form-section">
 //               <h3>Basic Information</h3>
-              
 //               <div className="form-group">
 //                 <label>Item Name</label>
-//                 <input
-//                   type="text"
-//                   name="name"
-//                   value={categoryItemFormData.name}
-//                   onChange={handleCategoryItemInputChange}
-//                   placeholder="Arduino Nano"
-//                   required
-//                 />
+//                 <input type="text" name="name" value={categoryItemFormData.name} onChange={handleCategoryItemInputChange} placeholder="ESP32 Development Board" required />
 //               </div>
-              
 //               <div className="form-group">
 //                 <label>Price (₹)</label>
-//                 <input
-//                   type="number"
-//                   name="price"
-//                   value={categoryItemFormData.price}
-//                   onChange={handleCategoryItemInputChange}
-//                   placeholder="350"
-//                   step="0.01"
-//                   min="0"
-//                   required
-//                 />
+//                 <input type="number" name="price" value={categoryItemFormData.price} onChange={handleCategoryItemInputChange} placeholder="450" step="0.01" min="0" required />
 //               </div>
-              
 //               <div className="form-group">
 //                 <label>Short Description</label>
-//                 <textarea
-//                   name="description"
-//                   value={categoryItemFormData.description}
-//                   onChange={handleCategoryItemInputChange}
-//                   placeholder="A compact Arduino board based on the ATmega328P."
-//                   rows="2"
-//                   required
-//                 />
+//                 <textarea name="description" value={categoryItemFormData.description} onChange={handleCategoryItemInputChange} placeholder="ESP32 is a powerful, low-cost microcontroller..." rows="2" required />
 //               </div>
-              
 //               <div className="form-group">
 //                 <label>Full Description</label>
-//                 <textarea
-//                   name="fullDescription"
-//                   value={categoryItemFormData.fullDescription}
-//                   onChange={handleCategoryItemInputChange}
-//                   placeholder="Detailed item description that will appear in the item details modal..."
-//                   rows="4"
-//                 />
+//                 <textarea name="fullDescription" value={categoryItemFormData.fullDescription} onChange={handleCategoryItemInputChange} placeholder="Detailed item description..." rows="4" />
 //               </div>
 //             </div>
-            
 //             <div className="form-section">
 //               <h3>Item Image</h3>
-              
 //               <div className="form-group">
 //                 <label>Item Image</label>
-//                 <input
-//                   type="file"
-//                   accept="image/jpeg,image/png,image/webp,image/gif"
-//                   onChange={handleImageChange}
-//                 />
-                
-//                 {isUploading && (
-//                   <div className="upload-progress">
-//                     <div 
-//                       className="progress-bar" 
-//                       style={{ width: `${uploadProgress}%` }}
-//                     ></div>
-//                     <span>{uploadProgress}%</span>
-//                   </div>
-//                 )}
-                
-//                 {imagePreview && (
-//                   <div className="image-preview">
-//                     <img src={imagePreview} alt="Item Preview" />
-//                   </div>
-//                 )}
+//                 <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageChange} />
+//                 {isUploading && <div className="upload-progress"><div className="progress-bar" style={{ width: `${uploadProgress}%` }}></div><span>{uploadProgress}%</span></div>}
+//                 {imagePreview && <div className="image-preview"><img src={imagePreview} alt="Item Preview" /></div>}
 //               </div>
 //             </div>
-            
 //             <div className="form-section">
 //               <h3>Specifications</h3>
-              
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Microcontroller</label>
+//                   <input type="text" name="microcontroller" value={categoryItemFormData.microcontroller} onChange={handleCategoryItemInputChange} placeholder="ESP32" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>Operating Voltage</label>
+//                   <input type="text" name="operatingVoltage" value={categoryItemFormData.operatingVoltage} onChange={handleCategoryItemInputChange} placeholder="3.3V" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Input Voltage (Recommended)</label>
+//                   <input type="text" name="inputVoltageRecommended" value={categoryItemFormData.inputVoltageRecommended} onChange={handleCategoryItemInputChange} placeholder="7-12V" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>Input Voltage (Limits)</label>
+//                   <input type="text" name="inputVoltageLimits" value={categoryItemFormData.inputVoltageLimits} onChange={handleCategoryItemInputChange} placeholder="5-20V" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Digital I/O Pins</label>
+//                   <input type="text" name="digitalIOPins" value={categoryItemFormData.digitalIOPins} onChange={handleCategoryItemInputChange} placeholder="34" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>Analog Input Pins</label>
+//                   <input type="text" name="analogInputPins" value={categoryItemFormData.analogInputPins} onChange={handleCategoryItemInputChange} placeholder="18" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>PWM Channels</label>
+//                   <input type="text" name="pwmChannels" value={categoryItemFormData.pwmChannels} onChange={handleCategoryItemInputChange} placeholder="16" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>Clock Speed</label>
+//                   <input type="text" name="clockSpeed" value={categoryItemFormData.clockSpeed} onChange={handleCategoryItemInputChange} placeholder="240 MHz" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Flash Memory</label>
+//                   <input type="text" name="flashMemory" value={categoryItemFormData.flashMemory} onChange={handleCategoryItemInputChange} placeholder="4 MB" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>SRAM</label>
+//                   <input type="text" name="sram" value={categoryItemFormData.sram} onChange={handleCategoryItemInputChange} placeholder="520 KB" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>EEPROM</label>
+//                   <input type="text" name="eeprom" value={categoryItemFormData.eeprom} onChange={handleCategoryItemInputChange} placeholder="No dedicated EEPROM" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>USB Interface</label>
+//                   <input type="text" name="usbInterface" value={categoryItemFormData.usbInterface} onChange={handleCategoryItemInputChange} placeholder="USB-C" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Communication Interfaces</label>
+//                   <input type="text" name="communicationInterfaces" value={categoryItemFormData.communicationInterfaces} onChange={handleCategoryItemInputChange} placeholder="Wi-Fi, Bluetooth, UART, SPI, I2C" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>Dimensions</label>
+//                   <input type="text" name="dimensions" value={categoryItemFormData.dimensions} onChange={handleCategoryItemInputChange} placeholder="60mm x 28mm x 13mm" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Weight</label>
+//                   <input type="text" name="weight" value={categoryItemFormData.weight} onChange={handleCategoryItemInputChange} placeholder="25g" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>Operating Temperature</label>
+//                   <input type="text" name="operatingTemperature" value={categoryItemFormData.operatingTemperature} onChange={handleCategoryItemInputChange} placeholder="-40°C to 85°C" />
+//                 </div>
+//               </div>
+//               <div className="form-row">
+//                 <div className="form-group half">
+//                   <label>Power Consumption</label>
+//                   <input type="text" name="powerConsumption" value={categoryItemFormData.powerConsumption} onChange={handleCategoryItemInputChange} placeholder="Variable, sleep modes available" />
+//                 </div>
+//                 <div className="form-group half">
+//                   <label>LED Indicators</label>
+//                   <input type="text" name="ledIndicators" value={categoryItemFormData.ledIndicators} onChange={handleCategoryItemInputChange} placeholder="Power LED, Status LED" />
+//                 </div>
+//               </div>
 //               <div className="form-row">
 //                 <div className="form-group half">
 //                   <label>Material</label>
-//                   <input
-//                     type="text"
-//                     name="material"
-//                     value={categoryItemFormData.material}
-//                     onChange={handleCategoryItemInputChange}
-//                     placeholder="FR-4 PCB with components"
-//                   />
+//                   <input type="text" name="material" value={categoryItemFormData.material} onChange={handleCategoryItemInputChange} placeholder="High-grade PCB" />
 //                 </div>
-                
 //                 <div className="form-group half">
-//                   <label>Dimensions</label>
-//                   <input
-//                     type="text"
-//                     name="dimensions"
-//                     value={categoryItemFormData.dimensions}
-//                     onChange={handleCategoryItemInputChange}
-//                     placeholder="45mm x 18mm"
-//                   />
+//                   <label>Warranty</label>
+//                   <input type="text" name="warranty" value={categoryItemFormData.warranty} onChange={handleCategoryItemInputChange} placeholder="1 year" />
 //                 </div>
 //               </div>
 //             </div>
-            
 //             <div className="form-section">
 //               <h3>Display Options</h3>
-              
+//               <div className="form-group">
+//                 <label>Delivery Speed</label>
+//                 <div className="delivery-speed-options">
+//                   {['quick', 'normal', 'late'].map(speed => (
+//                     <label className="radio-container" key={speed}>
+//                       <input type="radio" name="deliverySpeed" value={speed} checked={categoryItemFormData.deliverySpeed === speed} onChange={handleCategoryItemInputChange} />
+//                       <span className="radio-label">{speed.charAt(0).toUpperCase() + speed.slice(1)}</span>
+//                     </label>
+//                   ))}
+//                 </div>
+//               </div>
 //               <div className="form-group">
 //                 <div className="checkbox-container">
-//                   <input
-//                     type="checkbox"
-//                     name="active"
-//                     id="itemActive"
-//                     checked={categoryItemFormData.active}
-//                     onChange={handleCategoryItemInputChange}
-//                   />
+//                   <input type="checkbox" name="active" id="itemActive" checked={categoryItemFormData.active} onChange={handleCategoryItemInputChange} />
 //                   <label htmlFor="itemActive">Active (visible on website)</label>
 //                 </div>
 //               </div>
 //             </div>
-            
 //             <div className="form-actions">
-//               <button 
-//                 type="button" 
-//                 className="cancel-btn" 
-//                 onClick={resetForm}
-//               >
-//                 Cancel
-//               </button>
-              
-//               <button 
-//                 type="submit" 
-//                 className="submit-btn"
-//                 disabled={isUploading}
-//               >
-//                 {formMode === 'add' ? 'Add Item' : 'Update Item'}
-//               </button>
+//               <button type="button" className="cancel-btn" onClick={resetForm}>Cancel</button>
+//               <button type="submit" className="submit-btn" disabled={isUploading}>{formMode === 'add' ? 'Add Item' : 'Update Item'}</button>
 //             </div>
 //           </form>
+//           {formMode === 'edit' && <SpecificationComponent itemData={categoryItemFormData} itemType="categoryItems" />}
 //         </div>
 //       )}
-      
-//       {/* View All Button */}
+
 //       <div className="view-all-section">
-//         <button className="view-all-btn" onClick={handleViewAllItems}>
-//           View All Items
-//         </button>
+//         <button className="view-all-btn" onClick={handleViewAllItems}>View All Items</button>
 //       </div>
-      
-//       {/* Products List */}
+
 //       {activeMode === 'trending' && (
 //         <div className="card table-card">
 //           <h2>Recently Added Trending Components</h2>
-          
-//           {loading ? (
-//             <div className="loading">Loading products...</div>
-//           ) : (
+//           {loading ? <div className="loading">Loading products...</div> : (
 //             <div className="products-list">
-//               {products.length > 0 ? (
-//                 products.slice(0, 3).map(product => (
-//                   <div className="product-item" key={product.id}>
-//                     <div className="product-preview">
-//                       {product.imageUrl ? (
-//                         <img src={product.imageUrl} alt={product.name} />
-//                       ) : (
-//                         <div className="no-image">No Image</div>
-//                       )}
-//                     </div>
-                    
-//                     <div className="product-details">
-//                       <h3>{product.name || 'Untitled Product'}</h3>
-//                       <p className="product-price">₹{product.price ? product.price.toFixed(2) : '0.00'}</p>
-//                       <p>{product.description || 'No description'}</p>
-                      
-//                       <div className="status-badge">
-//                         <span className={product.active ? 'active' : 'inactive'}>
-//                           {product.active ? 'Active' : 'Inactive'}
-//                         </span>
-//                         {product.isQuick && (
-//                           <span className="quick-badge">Quick</span>
-//                         )}
-//                       </div>
-//                     </div>
-                    
-//                     <div className="product-actions">
-//                       <button 
-//                         className={`status-toggle-btn ${product.active ? 'deactivate' : 'activate'}`}
-//                         onClick={() => toggleItemStatus(product.id, product.active, 'trending')}
-//                       >
-//                         {product.active ? 'Deactivate' : 'Activate'}
-//                       </button>
-                      
-//                       <button 
-//                         className="edit-btn"
-//                         onClick={() => handleEditItem(product, 'trending')}
-//                       >
-//                         <i className="fas fa-edit"></i> Edit
-//                       </button>
-                      
-//                       <button 
-//                         className="delete-btn"
-//                         onClick={() => handleDeleteItem(product.id, product.imageUrl, 'trending')}
-//                       >
-//                         <i className="fas fa-trash"></i> Delete
-//                       </button>
+//               {products.slice(0, 3).map(product => (
+//                 <div className="product-item" key={product.id}>
+//                   <div className="product-preview">{product.imageUrl ? <img src={product.imageUrl} alt={product.name} /> : <div className="no-image">No Image</div>}</div>
+//                   <div className="product-details">
+//                     <h3>{product.name || 'Untitled Product'}</h3>
+//                     <p className="product-price">₹{product.price ? product.price.toFixed(2) : '0.00'}</p>
+//                     <p>{product.description || 'No description'}</p>
+//                     <div className="status-badge">
+//                       <span className={product.active ? 'active' : 'inactive'}>{product.active ? 'Active' : 'Inactive'}</span>
+//                       <span className={`delivery-badge ${product.deliverySpeed || 'normal'}`}>
+//                         {product.deliverySpeed ? product.deliverySpeed.charAt(0).toUpperCase() + product.deliverySpeed.slice(1) : 'Normal'}
+//                       </span>
 //                     </div>
 //                   </div>
-//                 ))
-//               ) : (
-//                 <div className="no-data">No products found. Add your first product above.</div>
-//               )}
-              
-//               {products.length > 3 && (
-//                 <div className="view-more">
-//                   <button className="view-more-btn" onClick={handleViewAllItems}>
-//                     View All Trending Components ({products.length})
-//                   </button>
+//                   <div className="product-actions">
+//                     <button className={`status-toggle-btn ${product.active ? 'deactivate' : 'activate'}`} onClick={() => toggleItemStatus(product.id, product.active, 'trending')}>
+//                       {product.active ? 'Deactivate' : 'Activate'}
+//                     </button>
+//                     <button className="edit-btn" onClick={() => handleEditItem(product, 'trending')}><i className="fas fa-edit"></i> Edit</button>
+//                     <button className="delete-btn" onClick={() => handleDeleteItem(product.id, product.imageUrl, 'trending')}><i className="fas fa-trash"></i> Delete</button>
+//                   </div>
 //                 </div>
-//               )}
+//               ))}
+//               {products.length > 3 && <div className="view-more"><button className="view-more-btn" onClick={handleViewAllItems}>View All Trending Components ({products.length})</button></div>}
 //             </div>
 //           )}
 //         </div>
 //       )}
-      
-//       {/* Categories List */}
+
 //       {activeMode === 'categories' && (
 //         <div className="card table-card">
 //           <h2>Recently Added Categories</h2>
-          
-//           {loading ? (
-//             <div className="loading">Loading categories...</div>
-//           ) : (
+//           {loading ? <div className="loading">Loading categories...</div> : (
 //             <div className="categories-list">
-//               {categories.length > 0 ? (
-//                 categories.slice(0, 3).map(category => (
-//                   <div className="category-item" key={category.id}>
-//                     <div className="category-preview">
-//                       {category.imageUrl ? (
-//                         <img src={category.imageUrl} alt={category.name} />
-//                       ) : (
-//                         <div className="no-image">No Image</div>
-//                       )}
-//                     </div>
-                    
-//                     <div className="category-details">
-//                       <h3>{category.name || 'Untitled Category'}</h3>
-//                       <p>{category.description || 'No description'}</p>
-                      
-//                       <div className="status-badge">
-//                         <span className={category.active ? 'active' : 'inactive'}>
-//                           {category.active ? 'Active' : 'Inactive'}
-//                         </span>
-//                       </div>
-//                     </div>
-                    
-//                     <div className="category-actions">
-//                       <button 
-//                         className={`status-toggle-btn ${category.active ? 'deactivate' : 'activate'}`}
-//                         onClick={() => toggleItemStatus(category.id, category.active, 'categories')}
-//                       >
-//                         {category.active ? 'Deactivate' : 'Activate'}
-//                       </button>
-                      
-//                       <button 
-//                         className="edit-btn"
-//                         onClick={() => handleEditItem(category, 'categories')}
-//                       >
-//                         <i className="fas fa-edit"></i> Edit
-//                       </button>
-                      
-//                       <button 
-//                         className="delete-btn"
-//                         onClick={() => handleDeleteItem(category.id, category.imageUrl, 'categories')}
-//                       >
-//                         <i className="fas fa-trash"></i> Delete
-//                       </button>
-//                     </div>
+//               {categories.slice(0, 3).map(category => (
+//                 <div className="category-item" key={category.id}>
+//                   <div className="category-preview">{category.imageUrl ? <img src={category.imageUrl} alt={category.name} /> : <div className="no-image">No Image</div>}</div>
+//                   <div className="category-details">
+//                     <h3>{category.name || 'Untitled Category'}</h3>
+//                     <p>{category.description || 'No description'}</p>
+//                     <div className="status-badge"><span className={category.active ? 'active' : 'inactive'}>{category.active ? 'Active' : 'Inactive'}</span></div>
 //                   </div>
-//                 ))
-//               ) : (
-//                 <div className="no-data">No categories found. Add your first category above.</div>
-//               )}
-              
-//               {categories.length > 3 && (
-//                 <div className="view-more">
-//                   <button className="view-more-btn" onClick={handleViewAllItems}>
-//                     View All Categories ({categories.length})
-//                   </button>
+//                   <div className="category-actions">
+//                     <button className={`status-toggle-btn ${category.active ? 'deactivate' : 'activate'}`} onClick={() => toggleItemStatus(category.id, category.active, 'categories')}>
+//                       {category.active ? 'Deactivate' : 'Activate'}
+//                     </button>
+//                     <button className="edit-btn" onClick={() => handleEditItem(category, 'categories')}><i className="fas fa-edit"></i> Edit</button>
+//                     <button className="delete-btn" onClick={() => handleDeleteItem(category.id, category.imageUrl, 'categories')}><i className="fas fa-trash"></i> Delete</button>
+//                   </div>
 //                 </div>
-//               )}
+//               ))}
+//               {categories.length > 3 && <div className="view-more"><button className="view-more-btn" onClick={handleViewAllItems}>View All Categories ({categories.length})</button></div>}
 //             </div>
 //           )}
 //         </div>
 //       )}
-      
-//       {/* Category Items List */}
+
 //       {activeMode === 'categoryItems' && (
 //         <div className="card table-card">
 //           <h2>Recently Added Category Items</h2>
-          
-//           {loading ? (
-//             <div className="loading">Loading category items...</div>
-//           ) : (
+//           {loading ? <div className="loading">Loading category items...</div> : (
 //             <div className="category-items-list">
-//               {categoryItems.length > 0 ? (
-//                 categoryItems.slice(0, 3).map(item => (
-//                   <div className="category-item-row" key={item.id}>
-//                     <div className="item-preview">
-//                       {item.imageUrl ? (
-//                         <img src={item.imageUrl} alt={item.name} />
-//                       ) : (
-//                         <div className="no-image">No Image</div>
-//                       )}
-//                     </div>
-                    
-//                     <div className="item-details">
-//                       <h3>{item.name || 'Untitled Item'}</h3>
-//                       <p className="item-category">Category: {item.categoryName || 'Unknown'}</p>
-//                       <p className="item-price">₹{item.price ? item.price.toFixed(2) : '0.00'}</p>
-//                       <p>{item.description || 'No description'}</p>
-                      
-//                       <div className="status-badge">
-//                         <span className={item.active ? 'active' : 'inactive'}>
-//                           {item.active ? 'Active' : 'Inactive'}
-//                         </span>
-//                       </div>
-//                     </div>
-                    
-//                     <div className="item-actions">
-//                       <button 
-//                         className={`status-toggle-btn ${item.active ? 'deactivate' : 'activate'}`}
-//                         onClick={() => toggleItemStatus(item.id, item.active, 'categoryItems')}
-//                       >
-//                         {item.active ? 'Deactivate' : 'Activate'}
-//                       </button>
-                      
-//                       <button 
-//                         className="edit-btn"
-//                         onClick={() => handleEditItem(item, 'categoryItems')}
-//                       >
-//                         <i className="fas fa-edit"></i> Edit
-//                       </button>
-                      
-//                       <button 
-//                         className="delete-btn"
-//                         onClick={() => handleDeleteItem(item.id, item.imageUrl, 'categoryItems')}
-//                       >
-//                         <i className="fas fa-trash"></i> Delete
-//                       </button>
+//               {categoryItems.slice(0, 3).map(item => (
+//                 <div className="category-item-row" key={item.id}>
+//                   <div className="item-preview">{item.imageUrl ? <img src={item.imageUrl} alt={item.name} /> : <div className="no-image">No Image</div>}</div>
+//                   <div className="item-details">
+//                     <h3>{item.name || 'Untitled Item'}</h3>
+//                     <p className="item-category">Category: {item.categoryName || 'Unknown'}</p>
+//                     <p className="item-price">₹{item.price ? item.price.toFixed(2) : '0.00'}</p>
+//                     <p>{item.description || 'No description'}</p>
+//                     <div className="status-badge">
+//                       <span className={item.active ? 'active' : 'inactive'}>{item.active ? 'Active' : 'Inactive'}</span>
+//                       <span className={`delivery-badge ${item.deliverySpeed || 'normal'}`}>
+//                         {item.deliverySpeed ? item.deliverySpeed.charAt(0).toUpperCase() + item.deliverySpeed.slice(1) : 'Normal'}
+//                       </span>
 //                     </div>
 //                   </div>
-//                 ))
-//               ) : (
-//                 <div className="no-data">No category items found. Add your first item above.</div>
-//               )}
-              
-//               {categoryItems.length > 3 && (
-//                 <div className="view-more">
-//                   <button className="view-more-btn" onClick={handleViewAllItems}>
-//                     View All Category Items ({categoryItems.length})
-//                   </button>
+//                   <div className="item-actions">
+//                     <button className={`status-toggle-btn ${item.active ? 'deactivate' : 'activate'}`} onClick={() => toggleItemStatus(item.id, item.active, 'categoryItems')}>
+//                       {item.active ? 'Deactivate' : 'Activate'}
+//                     </button>
+//                     <button className="edit-btn" onClick={() => handleEditItem(item, 'categoryItems')}><i className="fas fa-edit"></i> Edit</button>
+//                     <button className="delete-btn" onClick={() => handleDeleteItem(item.id, item.imageUrl, 'categoryItems')}><i className="fas fa-trash"></i> Delete</button>
+//                   </div>
 //                 </div>
-//               )}
+//               ))}
+//               {categoryItems.length > 3 && <div className="view-more"><button className="view-more-btn" onClick={handleViewAllItems}>View All Category Items ({categoryItems.length})</button></div>}
 //             </div>
 //           )}
 //         </div>
@@ -1752,7 +1152,9 @@
 
 
 
+
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   collection, 
   getDocs, 
@@ -1773,104 +1175,133 @@ import {
   getDownloadURL, 
   deleteObject 
 } from 'firebase/storage';
-import { useLocation, useNavigate } from 'react-router-dom';
+import SpecificationComponent from './SpecificationComponent';
 import { db, storage } from '../../firebase/firebaseConfig';
 import './ProductManagement.css';
 
 const ProductManagement = () => {
-  // Navigation
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const urlMode = queryParams.get('mode');
   const editId = queryParams.get('edit');
-  
-  // Mode state
-  const [activeMode, setActiveMode] = useState(urlMode || 'trending'); // 'trending', 'categories', or 'categoryItems'
-  
-  // Products (Trending Components) state
+
+  const [activeMode, setActiveMode] = useState(urlMode || 'trending');
   const [products, setProducts] = useState([]);
-  
-  // Categories state
   const [categories, setCategories] = useState([]);
-  
-  // Category Items state
   const [categoryItems, setCategoryItems] = useState([]);
-  
-  // Shared state
   const [loading, setLoading] = useState(true);
-  const [formMode, setFormMode] = useState('add'); // 'add' or 'edit'
+  const [formMode, setFormMode] = useState('add');
   const [currentItemId, setCurrentItemId] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Custom specifications
+  const [customSpecifications, setCustomSpecifications] = useState([]);
   
-  // Product form state
+  // Package points
+  const [packagePoints, setPackagePoints] = useState([]);
+
   const [productFormData, setProductFormData] = useState({
     name: '',
     price: '',
+    originalPrice: '',
+    discountPercentage: 0,
     description: '',
     fullDescription: '',
-    material: '',
+    microcontroller: '',
+    operatingVoltage: '',
+    inputVoltageRecommended: '',
+    inputVoltageLimits: '',
+    digitalIOPins: '',
+    analogInputPins: '',
+    pwmChannels: '',
+    clockSpeed: '',
+    flashMemory: '',
+    sram: '',
+    eeprom: '',
+    usbInterface: '',
+    communicationInterfaces: '',
     dimensions: '',
     weight: '',
+    operatingTemperature: '',
+    powerConsumption: '',
+    ledIndicators: '',
+    material: '',
     warranty: '',
     projectUsages: ['', '', '', ''],
-    deliverySpeed: 'normal', // Default value: 'normal' (options: 'quick', 'normal', 'late')
+    deliverySpeed: 'normal',
     isQuick: true,
     active: true,
-    imageUrl: ''
+    imageUrl: '',
+    customSpecifications: [],
+    packagePoints: []
   });
-  
-  // Category form state
+
   const [categoryFormData, setCategoryFormData] = useState({
     name: '',
     description: '',
     active: true,
-    imageUrl: ''
+    imageUrl: '',
+    customSpecifications: [],
+    packagePoints: []
   });
-  
-  // Category Item form state
+
   const [categoryItemFormData, setCategoryItemFormData] = useState({
     categoryId: '',
     categoryName: '',
     name: '',
     price: '',
+    originalPrice: '',
+    discountPercentage: 0,
     description: '',
     fullDescription: '',
-    material: '',
+    microcontroller: '',
+    operatingVoltage: '',
+    inputVoltageRecommended: '',
+    inputVoltageLimits: '',
+    digitalIOPins: '',
+    analogInputPins: '',
+    pwmChannels: '',
+    clockSpeed: '',
+    flashMemory: '',
+    sram: '',
+    eeprom: '',
+    usbInterface: '',
+    communicationInterfaces: '',
     dimensions: '',
     weight: '',
+    operatingTemperature: '',
+    powerConsumption: '',
+    ledIndicators: '',
+    material: '',
     warranty: '',
-    deliverySpeed: 'normal', // Default value: 'normal' (options: 'quick', 'normal', 'late')
+    deliverySpeed: 'normal',
     active: true,
-    imageUrl: ''
+    imageUrl: '',
+    customSpecifications: [],
+    packagePoints: []
   });
-  
-  // Fetch data on component mount
+
   useEffect(() => {
     fetchData();
-    
-    // If edit mode is activated via URL params
     if (editId && urlMode) {
       loadItemForEdit(editId, urlMode);
     }
   }, []);
-  
-  // Fetch data when active mode changes
+
   useEffect(() => {
     fetchData();
   }, [activeMode]);
-  
-  // Fetch categories whenever needed for category items form
+
   useEffect(() => {
     if (activeMode === 'categoryItems') {
       fetchCategories();
     }
   }, [activeMode]);
-  
-  // Fetch data based on active mode
+
   const fetchData = async () => {
     switch(activeMode) {
       case 'trending':
@@ -1881,92 +1312,56 @@ const ProductManagement = () => {
         break;
       case 'categoryItems':
         fetchCategoryItems();
-        fetchCategories(); // Need categories for the dropdown
+        fetchCategories();
         break;
       default:
         fetchProducts();
     }
   };
-  
-  // Load item for edit
+
   const loadItemForEdit = async (itemId, mode) => {
     try {
       setLoading(true);
       setFormMode('edit');
       setCurrentItemId(itemId);
-      
+
       let collectionName;
-      
       switch(mode) {
-        case 'trending':
-          collectionName = 'products';
-          break;
-        case 'categories':
-          collectionName = 'categories';
-          break;
-        case 'categoryItems':
-          collectionName = 'categoryItems';
-          break;
-        default:
-          collectionName = 'products';
+        case 'trending': collectionName = 'products'; break;
+        case 'categories': collectionName = 'categories'; break;
+        case 'categoryItems': collectionName = 'categoryItems'; break;
+        default: collectionName = 'products';
       }
-      
+
       const itemDoc = await getDoc(doc(db, collectionName, itemId));
-      
       if (itemDoc.exists()) {
         const itemData = itemDoc.data();
-        
         switch(mode) {
           case 'trending':
-            // Ensure project usages is an array with 4 elements
             let projectUsages = Array.isArray(itemData.projectUsages) ? [...itemData.projectUsages] : [];
-            while (projectUsages.length < 4) {
-              projectUsages.push('');
-            }
-            
+            while (projectUsages.length < 4) projectUsages.push('');
             setProductFormData({
-              name: itemData.name || '',
-              price: itemData.price || '',
-              description: itemData.description || '',
-              fullDescription: itemData.fullDescription || '',
-              material: itemData.material || '',
-              dimensions: itemData.dimensions || '',
-              weight: itemData.weight || '',
-              warranty: itemData.warranty || '',
+              ...itemData,
               projectUsages,
-              deliverySpeed: itemData.deliverySpeed || 'normal',
-              isQuick: itemData.isQuick !== undefined ? itemData.isQuick : true,
-              active: itemData.active !== undefined ? itemData.active : true,
-              imageUrl: itemData.imageUrl || ''
+              price: itemData.price || ''
             });
+            setCustomSpecifications(itemData.customSpecifications || []);
+            setPackagePoints(itemData.packagePoints || []);
             break;
           case 'categories':
-            setCategoryFormData({
-              name: itemData.name || '',
-              description: itemData.description || '',
-              active: itemData.active !== undefined ? itemData.active : true,
-              imageUrl: itemData.imageUrl || ''
-            });
+            setCategoryFormData(itemData);
+            setCustomSpecifications(itemData.customSpecifications || []);
+            setPackagePoints(itemData.packagePoints || []);
             break;
           case 'categoryItems':
             setCategoryItemFormData({
-              categoryId: itemData.categoryId || '',
-              categoryName: itemData.categoryName || '',
-              name: itemData.name || '',
-              price: itemData.price || '',
-              description: itemData.description || '',
-              fullDescription: itemData.fullDescription || '',
-              material: itemData.material || '',
-              dimensions: itemData.dimensions || '',
-              weight: itemData.weight || '',
-              warranty: itemData.warranty || '',
-              deliverySpeed: itemData.deliverySpeed || 'normal',
-              active: itemData.active !== undefined ? itemData.active : true,
-              imageUrl: itemData.imageUrl || ''
+              ...itemData,
+              price: itemData.price || ''
             });
+            setCustomSpecifications(itemData.customSpecifications || []);
+            setPackagePoints(itemData.packagePoints || []);
             break;
         }
-        
         setImagePreview(itemData.imageUrl);
       }
     } catch (error) {
@@ -1976,20 +1371,13 @@ const ProductManagement = () => {
       setLoading(false);
     }
   };
-  
-  // Fetch products from Firestore
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
       const productsQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(productsQuery);
-      
-      const productsData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      setProducts(productsData);
+      setProducts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     } catch (error) {
       console.error('Error fetching products:', error);
       alert('Failed to load products. Please check your connection and try again.');
@@ -1997,20 +1385,13 @@ const ProductManagement = () => {
       setLoading(false);
     }
   };
-  
-  // Fetch categories from Firestore
+
   const fetchCategories = async () => {
     try {
       setLoading(true);
       const categoriesQuery = query(collection(db, 'categories'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(categoriesQuery);
-      
-      const categoriesData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      setCategories(categoriesData);
+      setCategories(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     } catch (error) {
       console.error('Error fetching categories:', error);
       alert('Failed to load categories. Please check your connection and try again.');
@@ -2018,20 +1399,13 @@ const ProductManagement = () => {
       setLoading(false);
     }
   };
-  
-  // Fetch category items from Firestore
+
   const fetchCategoryItems = async () => {
     try {
       setLoading(true);
       const categoryItemsQuery = query(collection(db, 'categoryItems'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(categoryItemsQuery);
-      
-      const categoryItemsData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      setCategoryItems(categoryItemsData);
+      setCategoryItems(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     } catch (error) {
       console.error('Error fetching category items:', error);
       alert('Failed to load category items. Please check your connection and try again.');
@@ -2039,133 +1413,149 @@ const ProductManagement = () => {
       setLoading(false);
     }
   };
-  
-  // Handle product form input changes
+
+  // Handle custom specifications
+  const addCustomSpecification = () => {
+    setCustomSpecifications([...customSpecifications, { title: '', value: '' }]);
+  };
+
+  const removeCustomSpecification = (index) => {
+    const updatedSpecs = [...customSpecifications];
+    updatedSpecs.splice(index, 1);
+    setCustomSpecifications(updatedSpecs);
+  };
+
+  const handleCustomSpecificationChange = (index, field, value) => {
+    const updatedSpecs = [...customSpecifications];
+    updatedSpecs[index][field] = value;
+    setCustomSpecifications(updatedSpecs);
+  };
+
+  // Handle package points
+  const addPackagePoint = () => {
+    setPackagePoints([...packagePoints, '']);
+  };
+
+  const removePackagePoint = (index) => {
+    const updatedPoints = [...packagePoints];
+    updatedPoints.splice(index, 1);
+    setPackagePoints(updatedPoints);
+  };
+
+  const handlePackagePointChange = (index, value) => {
+    const updatedPoints = [...packagePoints];
+    updatedPoints[index] = value;
+    setPackagePoints(updatedPoints);
+  };
+
   const handleProductInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    if (name === 'price') {
-      // Ensure price is a valid number
-      const numberValue = value === '' ? '' : parseFloat(value);
-      if (!isNaN(numberValue) || value === '') {
-        setProductFormData({
-          ...productFormData,
-          [name]: value === '' ? '' : numberValue
-        });
+    setProductFormData(prev => {
+      const updatedData = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : (
+          (name === 'price' || name === 'originalPrice' || name === 'discountPercentage') && value !== '' 
+            ? parseFloat(value) 
+            : value
+        )
+      };
+      
+      // Auto-calculate price based on original price and discount percentage
+      if (name === 'originalPrice' || name === 'discountPercentage') {
+        const originalPrice = name === 'originalPrice' 
+          ? parseFloat(value) || 0 
+          : prev.originalPrice || 0;
+        
+        const discount = name === 'discountPercentage' 
+          ? parseFloat(value) || 0 
+          : prev.discountPercentage || 0;
+        
+        if (originalPrice > 0) {
+          updatedData.price = (originalPrice - (originalPrice * discount / 100)).toFixed(2);
+        }
       }
-    } else {
-      setProductFormData({
-        ...productFormData,
-        [name]: type === 'checkbox' ? checked : value
-      });
-    }
-  };
-  
-  // Handle category form input changes
-  const handleCategoryInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    
-    setCategoryFormData({
-      ...categoryFormData,
-      [name]: type === 'checkbox' ? checked : value
+      
+      return updatedData;
     });
   };
-  
-  // Handle category item form input changes
+
+  const handleCategoryInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setCategoryFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
   const handleCategoryItemInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    if (name === 'price') {
-      // Ensure price is a valid number
-      const numberValue = value === '' ? '' : parseFloat(value);
-      if (!isNaN(numberValue) || value === '') {
-        setCategoryItemFormData({
-          ...categoryItemFormData,
-          [name]: value === '' ? '' : numberValue
-        });
+    setCategoryItemFormData(prev => {
+      const updatedData = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : (
+          (name === 'price' || name === 'originalPrice' || name === 'discountPercentage') && value !== '' 
+            ? parseFloat(value) 
+            : value
+        ),
+        ...(name === 'categoryId' && {
+          categoryName: categories.find(cat => cat.id === value)?.name || ''
+        })
+      };
+      
+      // Auto-calculate price based on original price and discount percentage
+      if (name === 'originalPrice' || name === 'discountPercentage') {
+        const originalPrice = name === 'originalPrice' 
+          ? parseFloat(value) || 0 
+          : prev.originalPrice || 0;
+        
+        const discount = name === 'discountPercentage' 
+          ? parseFloat(value) || 0 
+          : prev.discountPercentage || 0;
+        
+        if (originalPrice > 0) {
+          updatedData.price = (originalPrice - (originalPrice * discount / 100)).toFixed(2);
+        }
       }
-    } else if (name === 'categoryId') {
-      // Update categoryName when categoryId changes
-      const selectedCategory = categories.find(cat => cat.id === value);
-      setCategoryItemFormData({
-        ...categoryItemFormData,
-        categoryId: value,
-        categoryName: selectedCategory ? selectedCategory.name : ''
-      });
-    } else {
-      setCategoryItemFormData({
-        ...categoryItemFormData,
-        [name]: type === 'checkbox' ? checked : value
-      });
-    }
-  };
-  
-  // Handle project usage changes
-  const handleProjectUsageChange = (index, value) => {
-    const updatedUsages = [...productFormData.projectUsages];
-    updatedUsages[index] = value;
-    setProductFormData({
-      ...productFormData,
-      projectUsages: updatedUsages
+      
+      return updatedData;
     });
   };
-  
-  // Handle image selection
+
+  const handleProjectUsageChange = (index, value) => {
+    setProductFormData(prev => ({
+      ...prev,
+      projectUsages: prev.projectUsages.map((usage, i) => i === index ? value : usage)
+    }));
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type and size
-      const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      
-      if (!validTypes.includes(file.type)) {
-        alert('Please select a valid image file (JPEG, PNG, WEBP, or GIF)');
-        return;
-      }
-      
-      if (file.size > maxSize) {
-        alert('Image size should be less than 5MB');
-        return;
-      }
-      
       setImageFile(file);
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
+      setImagePreview(URL.createObjectURL(file));
     }
   };
-  
-  // Upload image to Firebase Storage
+
   const uploadImage = async () => {
     if (!imageFile) return null;
-    
     setIsUploading(true);
     setUploadProgress(0);
-    
     try {
-      // Create a unique file path using timestamp and original filename
       const storageRef = ref(storage, `${activeMode}/${Date.now()}_${imageFile.name}`);
       const uploadTask = uploadBytesResumable(storageRef, imageFile);
-      
-      return new Promise((resolve, reject) => {
-        uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            const progress = Math.round(
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            );
-            setUploadProgress(progress);
-          },
-          (error) => {
-            console.error('Error uploading image:', error);
-            setIsUploading(false);
-            reject(error);
-          },
-          async () => {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            setIsUploading(false);
-            resolve(downloadURL);
-          }
-        );
+      return new Promise((resolve) => {
+        uploadTask.on('state_changed', (snapshot) => {
+          setUploadProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
+        }, (error) => {
+          console.error('Error uploading image:', error);
+          setIsUploading(false);
+        }, async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          setIsUploading(false);
+          resolve(downloadURL);
+        });
       });
     } catch (error) {
       console.error('Error in upload process:', error);
@@ -2173,64 +1563,35 @@ const ProductManagement = () => {
       return null;
     }
   };
-  
-  // Delete image from Firebase Storage
+
   const deleteImage = async (imageUrl) => {
-    if (!imageUrl || !imageUrl.startsWith('https://firebasestorage.googleapis.com')) return;
-    
-    try {
-      const imageRef = ref(storage, imageUrl);
-      await deleteObject(imageRef);
-    } catch (error) {
-      console.error('Error deleting image:', error);
-      // Continue with the process even if image deletion fails
+    if (imageUrl && imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
+      try {
+        await deleteObject(ref(storage, imageUrl));
+      } catch (error) {
+        console.error('Error deleting image:', error);
+      }
     }
   };
-  
-  // Add new product
+
   const addProduct = async (e) => {
     e.preventDefault();
-    
-    // Validate form
-    if (productFormData.name.trim() === '') {
-      alert('Please enter a product name');
-      return;
-    }
-    
-    if (productFormData.price === '' || isNaN(productFormData.price)) {
-      alert('Please enter a valid price');
-      return;
-    }
-    
+    if (!productFormData.name.trim() || isNaN(productFormData.price)) return alert('Please enter valid product details');
     try {
-      let imageUrl = productFormData.imageUrl;
-      
-      if (imageFile) {
-        imageUrl = await uploadImage();
-        if (!imageUrl) {
-          alert('Failed to upload image. Please try again.');
-          return;
-        }
-      }
-      
-      // Filter out empty project usages
-      const filteredProjectUsages = productFormData.projectUsages.filter(usage => usage.trim() !== '');
-      
-      // Update isQuick based on deliverySpeed
-      const isQuick = productFormData.deliverySpeed === 'quick';
-      
+      let imageUrl = await uploadImage();
       const productData = {
         ...productFormData,
         price: parseFloat(productFormData.price),
-        projectUsages: filteredProjectUsages,
-        isQuick,
-        imageUrl,
+        originalPrice: parseFloat(productFormData.originalPrice) || parseFloat(productFormData.price),
+        discountPercentage: parseFloat(productFormData.discountPercentage) || 0,
+        projectUsages: productFormData.projectUsages.filter(usage => usage.trim() !== ''),
+        isQuick: productFormData.deliverySpeed === 'quick',
+        imageUrl: imageUrl || productFormData.imageUrl,
+        customSpecifications: customSpecifications.filter(spec => spec.title.trim() !== '' && spec.value.trim() !== ''),
+        packagePoints: packagePoints.filter(point => point.trim() !== ''),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
-      
-      console.log("Adding new product with data:", productData);
-      
       await addDoc(collection(db, 'products'), productData);
       resetProductForm();
       fetchProducts();
@@ -2240,60 +1601,29 @@ const ProductManagement = () => {
       alert('Failed to add product. Please try again.');
     }
   };
-  
-  // Update existing product
+
   const updateProduct = async (e) => {
     e.preventDefault();
-    
-    if (!currentItemId) return;
-    
-    // Validate form
-    if (productFormData.name.trim() === '') {
-      alert('Please enter a product name');
-      return;
-    }
-    
-    if (productFormData.price === '' || isNaN(productFormData.price)) {
-      alert('Please enter a valid price');
-      return;
-    }
-    
+    if (!currentItemId || !productFormData.name.trim() || isNaN(productFormData.price)) return alert('Please enter valid product details');
     try {
       let imageUrl = productFormData.imageUrl;
-      
       if (imageFile) {
-        // Delete old image if updating with new one
-        if (imageUrl && imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-          await deleteImage(imageUrl);
-        }
-        
+        await deleteImage(imageUrl);
         imageUrl = await uploadImage();
-        if (!imageUrl) {
-          alert('Failed to upload image. Please try again.');
-          return;
-        }
       }
-      
-      // Filter out empty project usages
-      const filteredProjectUsages = productFormData.projectUsages.filter(usage => usage.trim() !== '');
-      
-      // Update isQuick based on deliverySpeed
-      const isQuick = productFormData.deliverySpeed === 'quick';
-      
       const productData = {
         ...productFormData,
         price: parseFloat(productFormData.price),
-        projectUsages: filteredProjectUsages,
-        isQuick,
-        imageUrl,
+        originalPrice: parseFloat(productFormData.originalPrice) || parseFloat(productFormData.price),
+        discountPercentage: parseFloat(productFormData.discountPercentage) || 0,
+        projectUsages: productFormData.projectUsages.filter(usage => usage.trim() !== ''),
+        isQuick: productFormData.deliverySpeed === 'quick',
+        imageUrl: imageUrl || productFormData.imageUrl,
+        customSpecifications: customSpecifications.filter(spec => spec.title.trim() !== '' && spec.value.trim() !== ''),
+        packagePoints: packagePoints.filter(point => point.trim() !== ''),
         updatedAt: serverTimestamp()
       };
-      
-      console.log("Updating product with data:", productData);
-      
-      const productRef = doc(db, 'products', currentItemId);
-      await updateDoc(productRef, productData);
-      
+      await updateDoc(doc(db, 'products', currentItemId), productData);
       resetProductForm();
       fetchProducts();
       alert('Product updated successfully!');
@@ -2302,37 +1632,20 @@ const ProductManagement = () => {
       alert('Failed to update product. Please try again.');
     }
   };
-  
-  // Add new category
+
   const addCategory = async (e) => {
     e.preventDefault();
-    
-    // Validate form
-    if (categoryFormData.name.trim() === '') {
-      alert('Please enter a category name');
-      return;
-    }
-    
+    if (!categoryFormData.name.trim()) return alert('Please enter a category name');
     try {
-      let imageUrl = categoryFormData.imageUrl;
-      
-      if (imageFile) {
-        imageUrl = await uploadImage();
-        if (!imageUrl) {
-          alert('Failed to upload image. Please try again.');
-          return;
-        }
-      }
-      
+      let imageUrl = await uploadImage();
       const categoryData = {
         ...categoryFormData,
-        imageUrl,
+        imageUrl: imageUrl || categoryFormData.imageUrl,
+        customSpecifications: customSpecifications.filter(spec => spec.title.trim() !== '' && spec.value.trim() !== ''),
+        packagePoints: packagePoints.filter(point => point.trim() !== ''),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
-      
-      console.log("Adding new category with data:", categoryData);
-      
       await addDoc(collection(db, 'categories'), categoryData);
       resetCategoryForm();
       fetchCategories();
@@ -2342,60 +1655,30 @@ const ProductManagement = () => {
       alert('Failed to add category. Please try again.');
     }
   };
-  
-  // Update existing category
+
   const updateCategory = async (e) => {
     e.preventDefault();
-    
-    if (!currentItemId) return;
-    
-    // Validate form
-    if (categoryFormData.name.trim() === '') {
-      alert('Please enter a category name');
-      return;
-    }
-    
+    if (!currentItemId || !categoryFormData.name.trim()) return alert('Please enter a category name');
     try {
       let imageUrl = categoryFormData.imageUrl;
-      
       if (imageFile) {
-        // Delete old image if updating with new one
-        if (imageUrl && imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-          await deleteImage(imageUrl);
-        }
-        
+        await deleteImage(imageUrl);
         imageUrl = await uploadImage();
-        if (!imageUrl) {
-          alert('Failed to upload image. Please try again.');
-          return;
-        }
       }
-      
       const categoryData = {
         ...categoryFormData,
-        imageUrl,
+        imageUrl: imageUrl || categoryFormData.imageUrl,
+        customSpecifications: customSpecifications.filter(spec => spec.title.trim() !== '' && spec.value.trim() !== ''),
+        packagePoints: packagePoints.filter(point => point.trim() !== ''),
         updatedAt: serverTimestamp()
       };
-      
-      console.log("Updating category with data:", categoryData);
-      
       const categoryRef = doc(db, 'categories', currentItemId);
       await updateDoc(categoryRef, categoryData);
-      
-      // Update category name in all associated category items
       const batch = writeBatch(db);
       const categoryItemsQuery = query(collection(db, 'categoryItems'), where('categoryId', '==', currentItemId));
       const categoryItemsSnapshot = await getDocs(categoryItemsQuery);
-      
-      categoryItemsSnapshot.docs.forEach(doc => {
-        batch.update(doc.ref, { 
-          categoryName: categoryFormData.name,
-          updatedAt: serverTimestamp()
-        });
-      });
-      
+      categoryItemsSnapshot.docs.forEach(doc => batch.update(doc.ref, { categoryName: categoryFormData.name, updatedAt: serverTimestamp() }));
       await batch.commit();
-      
       resetCategoryForm();
       fetchCategories();
       alert('Category updated successfully!');
@@ -2404,52 +1687,24 @@ const ProductManagement = () => {
       alert('Failed to update category. Please try again.');
     }
   };
-  
-  // Add new category item
+
   const addCategoryItem = async (e) => {
     e.preventDefault();
-    
-    // Validate form
-    if (categoryItemFormData.name.trim() === '') {
-      alert('Please enter an item name');
-      return;
-    }
-    
-    if (categoryItemFormData.price === '' || isNaN(categoryItemFormData.price)) {
-      alert('Please enter a valid price');
-      return;
-    }
-    
-    if (!categoryItemFormData.categoryId) {
-      alert('Please select a category');
-      return;
-    }
-    
+    if (!categoryItemFormData.name.trim() || isNaN(categoryItemFormData.price) || !categoryItemFormData.categoryId) return alert('Please enter valid item details');
     try {
-      let imageUrl = categoryItemFormData.imageUrl;
-      
-      if (imageFile) {
-        imageUrl = await uploadImage();
-        if (!imageUrl) {
-          alert('Failed to upload image. Please try again.');
-          return;
-        }
-      }
-      
-      // Set isQuick based on deliverySpeed
-      const isQuick = categoryItemFormData.deliverySpeed === 'quick';
-      
+      let imageUrl = await uploadImage();
       const categoryItemData = {
         ...categoryItemFormData,
         price: parseFloat(categoryItemFormData.price),
-        isQuick,
-        imageUrl,
+        originalPrice: parseFloat(categoryItemFormData.originalPrice) || parseFloat(categoryItemFormData.price),
+        discountPercentage: parseFloat(categoryItemFormData.discountPercentage) || 0,
+        isQuick: categoryItemFormData.deliverySpeed === 'quick',
+        imageUrl: imageUrl || categoryItemFormData.imageUrl,
+        customSpecifications: customSpecifications.filter(spec => spec.title.trim() !== '' && spec.value.trim() !== ''),
+        packagePoints: packagePoints.filter(point => point.trim() !== ''),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
-      
-      console.log("Adding new category item with data:", categoryItemData);
-      
       await addDoc(collection(db, 'categoryItems'), categoryItemData);
       resetCategoryItemForm();
       fetchCategoryItems();
@@ -2459,61 +1714,28 @@ const ProductManagement = () => {
       alert('Failed to add category item. Please try again.');
     }
   };
-  
-  // Update existing category item
+
   const updateCategoryItem = async (e) => {
     e.preventDefault();
-    
-    if (!currentItemId) return;
-    
-    // Validate form
-    if (categoryItemFormData.name.trim() === '') {
-      alert('Please enter an item name');
-      return;
-    }
-    
-    if (categoryItemFormData.price === '' || isNaN(categoryItemFormData.price)) {
-      alert('Please enter a valid price');
-      return;
-    }
-    
-    if (!categoryItemFormData.categoryId) {
-      alert('Please select a category');
-      return;
-    }
-    
+    if (!currentItemId || !categoryItemFormData.name.trim() || isNaN(categoryItemFormData.price) || !categoryItemFormData.categoryId) return alert('Please enter valid item details');
     try {
       let imageUrl = categoryItemFormData.imageUrl;
-      
       if (imageFile) {
-        // Delete old image if updating with new one
-        if (imageUrl && imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-          await deleteImage(imageUrl);
-        }
-        
+        await deleteImage(imageUrl);
         imageUrl = await uploadImage();
-        if (!imageUrl) {
-          alert('Failed to upload image. Please try again.');
-          return;
-        }
       }
-      
-      // Set isQuick based on deliverySpeed
-      const isQuick = categoryItemFormData.deliverySpeed === 'quick';
-      
       const categoryItemData = {
         ...categoryItemFormData,
         price: parseFloat(categoryItemFormData.price),
-        isQuick,
-        imageUrl,
+        originalPrice: parseFloat(categoryItemFormData.originalPrice) || parseFloat(categoryItemFormData.price),
+        discountPercentage: parseFloat(categoryItemFormData.discountPercentage) || 0,
+        isQuick: categoryItemFormData.deliverySpeed === 'quick',
+        imageUrl: imageUrl || categoryItemFormData.imageUrl,
+        customSpecifications: customSpecifications.filter(spec => spec.title.trim() !== '' && spec.value.trim() !== ''),
+        packagePoints: packagePoints.filter(point => point.trim() !== ''),
         updatedAt: serverTimestamp()
       };
-      
-      console.log("Updating category item with data:", categoryItemData);
-      
-      const categoryItemRef = doc(db, 'categoryItems', currentItemId);
-      await updateDoc(categoryItemRef, categoryItemData);
-      
+      await updateDoc(doc(db, 'categoryItems', currentItemId), categoryItemData);
       resetCategoryItemForm();
       fetchCategoryItems();
       alert('Category item updated successfully!');
@@ -2522,171 +1744,103 @@ const ProductManagement = () => {
       alert('Failed to update category item. Please try again.');
     }
   };
-  
-  // Delete item
+
   const handleDeleteItem = async (itemId, imageUrl, itemType) => {
-    const itemTypeName = 
-      itemType === 'trending' ? 'product' : 
-      itemType === 'categories' ? 'category' : 
-      'category item';
-    
-    if (window.confirm(`Are you sure you want to delete this ${itemTypeName}?`)) {
+    if (window.confirm(`Are you sure you want to delete this ${itemType === 'trending' ? 'product' : itemType === 'categories' ? 'category' : 'category item'}?`)) {
       try {
-        // If deleting a category, check if it has items
         if (itemType === 'categories') {
           const categoryItemsQuery = query(collection(db, 'categoryItems'), where('categoryId', '==', itemId));
           const categoryItemsSnapshot = await getDocs(categoryItemsQuery);
-          
           if (!categoryItemsSnapshot.empty) {
-            if (!window.confirm(`This category has ${categoryItemsSnapshot.size} items. Deleting it will also delete all associated items. Continue?`)) {
-              return;
-            }
-            
-            // Delete all associated category items
+            if (!window.confirm(`This category has ${categoryItemsSnapshot.size} items. Deleting it will also delete all associated items. Continue?`)) return;
             const batch = writeBatch(db);
             categoryItemsSnapshot.docs.forEach(doc => {
               batch.delete(doc.ref);
-              
-              // Delete category item images
-              const itemImageUrl = doc.data().imageUrl;
-              if (itemImageUrl && itemImageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-                deleteImage(itemImageUrl);
-              }
+              deleteImage(doc.data().imageUrl);
             });
-            
             await batch.commit();
           }
         }
-        
-        // Delete item document from Firestore
-        const collectionName = 
-          itemType === 'trending' ? 'products' : 
-          itemType === 'categories' ? 'categories' : 
-          'categoryItems';
-        
-        await deleteDoc(doc(db, collectionName, itemId));
-        
-        // Delete item image from Storage if it's a Firebase Storage URL
-        if (imageUrl && imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-          await deleteImage(imageUrl);
-        }
-        
-        // Refresh the appropriate list
-        if (itemType === 'trending') {
-          fetchProducts();
-        } else if (itemType === 'categories') {
-          fetchCategories();
-        } else {
-          fetchCategoryItems();
-        }
-        
-        alert(`${itemTypeName.charAt(0).toUpperCase() + itemTypeName.slice(1)} deleted successfully!`);
+        await deleteDoc(doc(db, itemType === 'trending' ? 'products' : itemType === 'categories' ? 'categories' : 'categoryItems', itemId));
+        await deleteImage(imageUrl);
+        if (itemType === 'trending') fetchProducts();
+        else if (itemType === 'categories') fetchCategories();
+        else fetchCategoryItems();
+        alert(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} deleted successfully!`);
       } catch (error) {
-        console.error(`Error deleting ${itemTypeName}:`, error);
-        alert(`Failed to delete ${itemTypeName}. Please try again.`);
+        console.error(`Error deleting ${itemType}:`, error);
+        alert(`Failed to delete ${itemType}. Please try again.`);
       }
     }
   };
-  
-  // Toggle item active status
+
   const toggleItemStatus = async (itemId, currentStatus, itemType) => {
     try {
-      const collectionName = 
-        itemType === 'trending' ? 'products' : 
-        itemType === 'categories' ? 'categories' : 
-        'categoryItems';
-      
-      const itemRef = doc(db, collectionName, itemId);
-      await updateDoc(itemRef, {
+      await updateDoc(doc(db, itemType === 'trending' ? 'products' : itemType === 'categories' ? 'categories' : 'categoryItems', itemId), {
         active: !currentStatus,
         updatedAt: serverTimestamp()
       });
-      
-      // Refresh the appropriate list
-      if (itemType === 'trending') {
-        fetchProducts();
-      } else if (itemType === 'categories') {
-        fetchCategories();
-      } else {
-        fetchCategoryItems();
-      }
+      if (itemType === 'trending') fetchProducts();
+      else if (itemType === 'categories') fetchCategories();
+      else fetchCategoryItems();
     } catch (error) {
       console.error('Error toggling item status:', error);
       alert('Failed to update item status. Please try again.');
     }
   };
-  
-  // Edit item (load data into form)
+
   const handleEditItem = (item, itemType) => {
     setFormMode('edit');
     setCurrentItemId(item.id);
-    
     if (itemType === 'trending') {
-      // Ensure project usages is an array with 4 elements
       let projectUsages = Array.isArray(item.projectUsages) ? [...item.projectUsages] : [];
-      while (projectUsages.length < 4) {
-        projectUsages.push('');
-      }
-      
-      setProductFormData({
-        name: item.name || '',
-        price: item.price || '',
-        description: item.description || '',
-        fullDescription: item.fullDescription || '',
-        material: item.material || '',
-        dimensions: item.dimensions || '',
-        weight: item.weight || '',
-        warranty: item.warranty || '',
-        projectUsages,
-        deliverySpeed: item.deliverySpeed || 'normal',
-        isQuick: item.isQuick !== undefined ? item.isQuick : true,
-        active: item.active !== undefined ? item.active : true,
-        imageUrl: item.imageUrl || ''
-      });
+      while (projectUsages.length < 4) projectUsages.push('');
+      setProductFormData({ ...item, projectUsages });
     } else if (itemType === 'categories') {
-      setCategoryFormData({
-        name: item.name || '',
-        description: item.description || '',
-        active: item.active !== undefined ? item.active : true,
-        imageUrl: item.imageUrl || ''
-      });
+      setCategoryFormData(item);
     } else {
-      setCategoryItemFormData({
-        categoryId: item.categoryId || '',
-        categoryName: item.categoryName || '',
-        name: item.name || '',
-        price: item.price || '',
-        description: item.description || '',
-        fullDescription: item.fullDescription || '',
-        material: item.material || '',
-        dimensions: item.dimensions || '',
-        weight: item.weight || '',
-        warranty: item.warranty || '',
-        deliverySpeed: item.deliverySpeed || 'normal',
-        active: item.active !== undefined ? item.active : true,
-        imageUrl: item.imageUrl || ''
-      });
+      setCategoryItemFormData(item);
     }
-    
+    setCustomSpecifications(item.customSpecifications || []);
+    setPackagePoints(item.packagePoints || []);
     setImagePreview(item.imageUrl);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  
-  // Reset product form
+
   const resetProductForm = () => {
     setFormMode('add');
     setCurrentItemId(null);
     setImageFile(null);
     setImagePreview(null);
     setUploadProgress(0);
+    setCustomSpecifications([]);
+    setPackagePoints([]);
     setProductFormData({
       name: '',
       price: '',
+      originalPrice: '',
+      discountPercentage: 0,
       description: '',
       fullDescription: '',
-      material: '',
+      microcontroller: '',
+      operatingVoltage: '',
+      inputVoltageRecommended: '',
+      inputVoltageLimits: '',
+      digitalIOPins: '',
+      analogInputPins: '',
+      pwmChannels: '',
+      clockSpeed: '',
+      flashMemory: '',
+      sram: '',
+      eeprom: '',
+      usbInterface: '',
+      communicationInterfaces: '',
       dimensions: '',
       weight: '',
+      operatingTemperature: '',
+      powerConsumption: '',
+      ledIndicators: '',
+      material: '',
       warranty: '',
       projectUsages: ['', '', '', ''],
       deliverySpeed: 'normal',
@@ -2695,14 +1849,15 @@ const ProductManagement = () => {
       imageUrl: ''
     });
   };
-  
-  // Reset category form
+
   const resetCategoryForm = () => {
     setFormMode('add');
     setCurrentItemId(null);
     setImageFile(null);
     setImagePreview(null);
     setUploadProgress(0);
+    setCustomSpecifications([]);
+    setPackagePoints([]);
     setCategoryFormData({
       name: '',
       description: '',
@@ -2710,908 +1865,776 @@ const ProductManagement = () => {
       imageUrl: ''
     });
   };
-  
-  // Reset category item form
+
   const resetCategoryItemForm = () => {
     setFormMode('add');
     setCurrentItemId(null);
     setImageFile(null);
     setImagePreview(null);
     setUploadProgress(0);
+    setCustomSpecifications([]);
+    setPackagePoints([]);
     setCategoryItemFormData({
       categoryId: '',
       categoryName: '',
       name: '',
       price: '',
+      originalPrice: '',
+      discountPercentage: 0,
       description: '',
       fullDescription: '',
-      material: '',
+      microcontroller: '',
+      operatingVoltage: '',
+      inputVoltageRecommended: '',
+      inputVoltageLimits: '',
+      digitalIOPins: '',
+      analogInputPins: '',
+      pwmChannels: '',
+      clockSpeed: '',
+      flashMemory: '',
+      sram: '',
+      eeprom: '',
+      usbInterface: '',
+      communicationInterfaces: '',
       dimensions: '',
       weight: '',
+      operatingTemperature: '',
+      powerConsumption: '',
+      ledIndicators: '',
+      material: '',
       warranty: '',
       deliverySpeed: 'normal',
       active: true,
       imageUrl: ''
     });
   };
-  
-  // Reset form based on active mode
+
   const resetForm = () => {
     switch(activeMode) {
-      case 'trending':
-        resetProductForm();
-        break;
-      case 'categories':
-        resetCategoryForm();
-        break;
-      case 'categoryItems':
-        resetCategoryItemForm();
-        break;
-      default:
-        resetProductForm();
+      case 'trending': resetProductForm(); break;
+      case 'categories': resetCategoryForm(); break;
+      case 'categoryItems': resetCategoryItemForm(); break;
+      default: resetProductForm();
     }
   };
-  
-  // Handle form submission
+
   const handleFormSubmit = (e) => {
+    e.preventDefault();
     switch(activeMode) {
-      case 'trending':
-        if (formMode === 'add') {
-          addProduct(e);
-        } else {
-          updateProduct(e);
-        }
-        break;
-      case 'categories':
-        if (formMode === 'add') {
-          addCategory(e);
-        } else {
-          updateCategory(e);
-        }
-        break;
-      case 'categoryItems':
-        if (formMode === 'add') {
-          addCategoryItem(e);
-        } else {
-          updateCategoryItem(e);
-        }
-        break;
-      default:
-        addProduct(e);
+      case 'trending': formMode === 'add' ? addProduct(e) : updateProduct(e); break;
+      case 'categories': formMode === 'add' ? addCategory(e) : updateCategory(e); break;
+      case 'categoryItems': formMode === 'add' ? addCategoryItem(e) : updateCategoryItem(e); break;
+      default: addProduct(e);
     }
   };
-  
-  // Change active management mode
+
   const changeMode = (mode) => {
     resetForm();
     setActiveMode(mode);
-    
-    // Update URL without navigation
     const url = new URL(window.location);
     url.searchParams.set('mode', mode);
     window.history.pushState({}, '', url);
   };
-  
-  // View all items button click handler
-  const handleViewAllItems = () => {
-    navigate('/manage-items');
-  };
-  
+
+  const handleViewAllItems = () => navigate('/manage-items');
+
+  // Custom Specifications UI
+  const renderCustomSpecificationsUI = () => (
+    <div className="form-section">
+      <div className="section-header">
+        <h3>Custom Specifications</h3>
+        <button type="button" className="add-btn" onClick={addCustomSpecification}>
+          <i className="fas fa-plus"></i> Add Specification
+        </button>
+      </div>
+      {customSpecifications.map((spec, index) => (
+        <div className="custom-specification-row" key={index}>
+          <div className="form-row">
+            <div className="form-group half">
+              <input 
+                type="text" 
+                placeholder="Specification Title" 
+                value={spec.title} 
+                onChange={(e) => handleCustomSpecificationChange(index, 'title', e.target.value)}
+              />
+            </div>
+            <div className="form-group half">
+              <input 
+                type="text" 
+                placeholder="Specification Value" 
+                value={spec.value} 
+                onChange={(e) => handleCustomSpecificationChange(index, 'value', e.target.value)}
+              />
+            </div>
+            <button 
+              type="button" 
+              className="remove-btn" 
+              onClick={() => removeCustomSpecification(index)}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      ))}
+      {customSpecifications.length === 0 && (
+        <p className="no-items-text">No custom specifications added yet</p>
+      )}
+    </div>
+  );
+
+  // Package Points UI
+  const renderPackagePointsUI = () => (
+    <div className="form-section">
+      <div className="section-header">
+        <h3>Package Contents</h3>
+        <button type="button" className="add-btn" onClick={addPackagePoint}>
+          <i className="fas fa-plus"></i> Add Package Item
+        </button>
+      </div>
+      {packagePoints.map((point, index) => (
+        <div className="package-point-row" key={index}>
+          <div className="form-row">
+            <div className="form-group bullet-input">
+              <i className="fas fa-circle bullet-icon"></i>
+              <input 
+                type="text" 
+                placeholder="Package item description" 
+                value={point} 
+                onChange={(e) => handlePackagePointChange(index, e.target.value)}
+              />
+            </div>
+            <button 
+              type="button" 
+              className="remove-btn" 
+              onClick={() => removePackagePoint(index)}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      ))}
+      {packagePoints.length === 0 && (
+        <p className="no-items-text">No package items added yet</p>
+      )}
+    </div>
+  );
+
   return (
     <div className="content">
       <h1 className="page-title">Create Items</h1>
-      
-      {/* Navigation Tabs */}
       <div className="management-tabs">
-        <button 
-          className={`tab-btn ${activeMode === 'trending' ? 'active' : ''}`}
-          onClick={() => changeMode('trending')}
-        >
+        <button className={`tab-btn ${activeMode === 'trending' ? 'active' : ''}`} onClick={() => changeMode('trending')}>
           Create Trending Components
         </button>
-        <button 
-          className={`tab-btn ${activeMode === 'categories' ? 'active' : ''}`}
-          onClick={() => changeMode('categories')}
-        >
+        <button className={`tab-btn ${activeMode === 'categories' ? 'active' : ''}`} onClick={() => changeMode('categories')}>
           Create Categories
         </button>
-        <button 
-          className={`tab-btn ${activeMode === 'categoryItems' ? 'active' : ''}`}
-          onClick={() => changeMode('categoryItems')}
-        >
+        <button className={`tab-btn ${activeMode === 'categoryItems' ? 'active' : ''}`} onClick={() => changeMode('categoryItems')}>
           Create Category Items
         </button>
       </div>
-      
-      {/* Product Form */}
+
       {activeMode === 'trending' && (
         <div className="card form-card">
           <h2>{formMode === 'add' ? 'Add New Trending Component' : 'Edit Trending Component'}</h2>
-          
           <form onSubmit={handleFormSubmit}>
             <div className="form-section">
               <h3>Basic Information</h3>
-              
               <div className="form-group">
                 <label>Product Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={productFormData.name}
-                  onChange={handleProductInputChange}
-                  placeholder="Arduino Uno R3"
-                  required
-                />
+                <input type="text" name="name" value={productFormData.name} onChange={handleProductInputChange} placeholder="Arduino Uno R3" required />
               </div>
-              
               <div className="form-group">
-                <label>Price (₹)</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={productFormData.price}
-                  onChange={handleProductInputChange}
-                  placeholder="450"
-                  step="0.01"
-                  min="0"
-                  required
+                <label>Original Price (₹)</label>
+                <input 
+                  type="number" 
+                  name="originalPrice" 
+                  value={productFormData.originalPrice} 
+                  onChange={handleProductInputChange} 
+                  placeholder="500" 
+                  step="0.01" 
+                  min="0" 
+                  required 
                 />
               </div>
-              
+              <div className="form-group">
+                <label>Discount Percentage (%)</label>
+                <input 
+                  type="number" 
+                  name="discountPercentage" 
+                  value={productFormData.discountPercentage} 
+                  onChange={handleProductInputChange} 
+                  placeholder="10" 
+                  step="0.01" 
+                  min="0" 
+                  max="100" 
+                />
+              </div>
+              <div className="form-group">
+                <label>Selling Price (₹)</label>
+                <input 
+                  type="number" 
+                  name="price" 
+                  value={productFormData.price} 
+                  onChange={handleProductInputChange} 
+                  placeholder="450" 
+                  step="0.01" 
+                  min="0" 
+                  required 
+                  readOnly={productFormData.originalPrice && productFormData.discountPercentage > 0}
+                  className={productFormData.originalPrice && productFormData.discountPercentage > 0 ? "calculated-price" : ""}
+                />
+                {productFormData.originalPrice && productFormData.discountPercentage > 0 && (
+                  <small className="price-info">Calculated based on original price and discount</small>
+                )}
+              </div>
               <div className="form-group">
                 <label>Short Description</label>
-                <textarea
-                  name="description"
-                  value={productFormData.description}
-                  onChange={handleProductInputChange}
-                  placeholder="The Arduino Uno is an open-source microcontroller board based on the ATmega328P."
-                  rows="2"
-                  required
-                />
+                <textarea name="description" value={productFormData.description} onChange={handleProductInputChange} placeholder="The Arduino Uno is an open-source microcontroller board..." rows="2" required />
               </div>
-              
               <div className="form-group">
                 <label>Full Description</label>
-                <textarea
-                  name="fullDescription"
-                  value={productFormData.fullDescription}
-                  onChange={handleProductInputChange}
-                  placeholder="Detailed product description that will appear in the product details modal..."
-                  rows="4"
-                />
+                <textarea name="fullDescription" value={productFormData.fullDescription} onChange={handleProductInputChange} placeholder="Detailed product description..." rows="4" />
               </div>
             </div>
-            
-            <div className="form-section">
-              <h3>Product Image</h3>
-              
-              <div className="form-group">
-                <label>Product Image</label>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={handleImageChange}
-                />
-                
-                {isUploading && (
-                  <div className="upload-progress">
-                    <div 
-                      className="progress-bar" 
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                    <span>{uploadProgress}%</span>
-                  </div>
-                )}
-                
-                {imagePreview && (
-                  <div className="image-preview">
-                    <img src={imagePreview} alt="Product Preview" />
-                  </div>
-                )}
-              </div>
-            </div>
-            
             <div className="form-section">
               <h3>Specifications</h3>
-              
               <div className="form-row">
                 <div className="form-group half">
-                  <label>Material</label>
-                  <input
-                    type="text"
-                    name="material"
-                    value={productFormData.material}
-                    onChange={handleProductInputChange}
-                    placeholder="High-grade PCB"
-                  />
+                  <label>Microcontroller</label>
+                  <input type="text" name="microcontroller" value={productFormData.microcontroller} onChange={handleProductInputChange} placeholder="ATmega328P" />
                 </div>
-                
                 <div className="form-group half">
-                  <label>Dimensions</label>
-                  <input
-                    type="text"
-                    name="dimensions"
-                    value={productFormData.dimensions}
-                    onChange={handleProductInputChange}
-                    placeholder="60mm x 28mm x 13mm"
-                  />
+                  <label>Operating Voltage</label>
+                  <input type="text" name="operatingVoltage" value={productFormData.operatingVoltage} onChange={handleProductInputChange} placeholder="5V" />
                 </div>
               </div>
-              
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Input Voltage (Recommended)</label>
+                  <input type="text" name="inputVoltageRecommended" value={productFormData.inputVoltageRecommended} onChange={handleProductInputChange} placeholder="7-12V" />
+                </div>
+                <div className="form-group half">
+                  <label>Input Voltage (Limits)</label>
+                  <input type="text" name="inputVoltageLimits" value={productFormData.inputVoltageLimits} onChange={handleProductInputChange} placeholder="6-20V" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Digital I/O Pins</label>
+                  <input type="text" name="digitalIOPins" value={productFormData.digitalIOPins} onChange={handleProductInputChange} placeholder="14 (6 PWM)" />
+                </div>
+                <div className="form-group half">
+                  <label>Analog Input Pins</label>
+                  <input type="text" name="analogInputPins" value={productFormData.analogInputPins} onChange={handleProductInputChange} placeholder="8 (A0 to A7)" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>PWM Channels</label>
+                  <input type="text" name="pwmChannels" value={productFormData.pwmChannels} onChange={handleProductInputChange} placeholder="6" />
+                </div>
+                <div className="form-group half">
+                  <label>Clock Speed</label>
+                  <input type="text" name="clockSpeed" value={productFormData.clockSpeed} onChange={handleProductInputChange} placeholder="16 MHz" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Flash Memory</label>
+                  <input type="text" name="flashMemory" value={productFormData.flashMemory} onChange={handleProductInputChange} placeholder="32 KB" />
+                </div>
+                <div className="form-group half">
+                  <label>SRAM</label>
+                  <input type="text" name="sram" value={productFormData.sram} onChange={handleProductInputChange} placeholder="2 KB" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>EEPROM</label>
+                  <input type="text" name="eeprom" value={productFormData.eeprom} onChange={handleProductInputChange} placeholder="1 KB" />
+                </div>
+                <div className="form-group half">
+                  <label>USB Interface</label>
+                  <input type="text" name="usbInterface" value={productFormData.usbInterface} onChange={handleProductInputChange} placeholder="Mini USB" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Communication Interfaces</label>
+                  <input type="text" name="communicationInterfaces" value={productFormData.communicationInterfaces} onChange={handleProductInputChange} placeholder="UART, SPI, I2C" />
+                </div>
+                <div className="form-group half">
+                  <label>Dimensions</label>
+                  <input type="text" name="dimensions" value={productFormData.dimensions} onChange={handleProductInputChange} placeholder="45mm x 18mm" />
+                </div>
+              </div>
               <div className="form-row">
                 <div className="form-group half">
                   <label>Weight</label>
-                  <input
-                    type="text"
-                    name="weight"
-                    value={productFormData.weight}
-                    onChange={handleProductInputChange}
-                    placeholder="25g"
-                  />
+                  <input type="text" name="weight" value={productFormData.weight} onChange={handleProductInputChange} placeholder="7 grams" />
                 </div>
-                
                 <div className="form-group half">
-                  <label>Warranty</label>
-                  <input
-                    type="text"
-                    name="warranty"
-                    value={productFormData.warranty}
-                    onChange={handleProductInputChange}
-                    placeholder="1 year"
-                  />
+                  <label>Operating Temperature</label>
+                  <input type="text" name="operatingTemperature" value={productFormData.operatingTemperature} onChange={handleProductInputChange} placeholder="-40°C to 85°C" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Power Consumption</label>
+                  <input type="text" name="powerConsumption" value={productFormData.powerConsumption} onChange={handleProductInputChange} placeholder="Low power with sleep modes" />
+                </div>
+                <div className="form-group half">
+                  <label>LED Indicators</label>
+                  <input type="text" name="ledIndicators" value={productFormData.ledIndicators} onChange={handleProductInputChange} placeholder="Power LED, TX/RX LEDs" />
                 </div>
               </div>
             </div>
-            
+
+            {/* Custom Specifications */}
+            {renderCustomSpecificationsUI()}
+
+            {/* Package Points */}
+            {renderPackagePointsUI()}
+
+            <div className="form-section">
+              <h3>Product Image</h3>
+              <div className="form-group">
+                <label>Product Image</label>
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageChange} />
+                {isUploading && <div className="upload-progress"><div className="progress-bar" style={{ width: `${uploadProgress}%` }}></div><span>{uploadProgress}%</span></div>}
+                {imagePreview && <div className="image-preview"><img src={imagePreview} alt="Product Preview" /></div>}
+              </div>
+            </div>
             <div className="form-section">
               <h3>Project Usages</h3>
-              
               {productFormData.projectUsages.map((usage, index) => (
                 <div className="form-group" key={index}>
                   <label>Usage {index + 1}</label>
-                  <input
-                    type="text"
-                    value={usage}
-                    onChange={(e) => handleProjectUsageChange(index, e.target.value)}
-                    placeholder={`Project usage example ${index + 1}`}
-                  />
+                  <input type="text" value={usage} onChange={(e) => handleProjectUsageChange(index, e.target.value)} placeholder={`Project usage example ${index + 1}`} />
                 </div>
               ))}
             </div>
-            
             <div className="form-section">
               <h3>Display Options</h3>
-              
               <div className="form-group">
                 <label>Delivery Speed</label>
                 <div className="delivery-speed-options">
-                  <label className="radio-container">
-                    <input
-                      type="radio"
-                      name="deliverySpeed"
-                      value="quick"
-                      checked={productFormData.deliverySpeed === 'quick'}
-                      onChange={handleProductInputChange}
-                    />
-                    <span className="radio-label">Quick</span>
-                  </label>
-                  
-                  <label className="radio-container">
-                    <input
-                      type="radio"
-                      name="deliverySpeed"
-                      value="normal"
-                      checked={productFormData.deliverySpeed === 'normal'}
-                      onChange={handleProductInputChange}
-                    />
-                    <span className="radio-label">Normal</span>
-                  </label>
-                  
-                  <label className="radio-container">
-                    <input
-                      type="radio"
-                      name="deliverySpeed"
-                      value="late"
-                      checked={productFormData.deliverySpeed === 'late'}
-                      onChange={handleProductInputChange}
-                    />
-                    <span className="radio-label">Late</span>
-                  </label>
+                  {['quick', 'normal', 'late'].map(speed => (
+                    <label className="radio-container" key={speed}>
+                      <input type="radio" name="deliverySpeed" value={speed} checked={productFormData.deliverySpeed === speed} onChange={handleProductInputChange} />
+                      <span className="radio-label">{speed.charAt(0).toUpperCase() + speed.slice(1)}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
-              
               <div className="form-group">
                 <div className="checkbox-container">
-                  <input
-                    type="checkbox"
-                    name="active"
-                    id="active"
-                    checked={productFormData.active}
-                    onChange={handleProductInputChange}
-                  />
+                  <input type="checkbox" name="active" id="active" checked={productFormData.active} onChange={handleProductInputChange} />
                   <label htmlFor="active">Active (visible on website)</label>
                 </div>
               </div>
             </div>
-            
             <div className="form-actions">
-              <button 
-                type="button" 
-                className="cancel-btn" 
-                onClick={resetForm}
-              >
-                Cancel
-              </button>
-              
-              <button 
-                type="submit" 
-                className="submit-btn"
-                disabled={isUploading}
-              >
-                {formMode === 'add' ? 'Add Product' : 'Update Product'}
-              </button>
+              <button type="button" className="cancel-btn" onClick={resetForm}>Cancel</button>
+              <button type="submit" className="submit-btn" disabled={isUploading}>{formMode === 'add' ? 'Add Product' : 'Update Product'}</button>
             </div>
           </form>
+          {formMode === 'edit' && <SpecificationComponent itemData={{
+            ...productFormData, 
+            customSpecifications, 
+            packagePoints
+          }} itemType="trending" />}
         </div>
       )}
-      
-      {/* Category Form */}
+
       {activeMode === 'categories' && (
         <div className="card form-card">
           <h2>{formMode === 'add' ? 'Add New Category' : 'Edit Category'}</h2>
-          
           <form onSubmit={handleFormSubmit}>
             <div className="form-section">
               <h3>Basic Information</h3>
-              
               <div className="form-group">
                 <label>Category Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={categoryFormData.name}
-                  onChange={handleCategoryInputChange}
-                  placeholder="Microcontrollers"
-                  required
-                />
+                <input type="text" name="name" value={categoryFormData.name} onChange={handleCategoryInputChange} placeholder="Microcontrollers" required />
               </div>
-              
               <div className="form-group">
                 <label>Description</label>
-                <textarea
-                  name="description"
-                  value={categoryFormData.description}
-                  onChange={handleCategoryInputChange}
-                  placeholder="A collection of microcontroller boards and related components."
-                  rows="3"
-                />
+                <textarea name="description" value={categoryFormData.description} onChange={handleCategoryInputChange} placeholder="A collection of microcontroller boards..." rows="3" />
               </div>
-              
               <div className="form-group">
                 <div className="checkbox-container">
-                  <input
-                    type="checkbox"
-                    name="active"
-                    id="categoryActive"
-                    checked={categoryFormData.active}
-                    onChange={handleCategoryInputChange}
-                  />
+                  <input type="checkbox" name="active" id="categoryActive" checked={categoryFormData.active} onChange={handleCategoryInputChange} />
                   <label htmlFor="categoryActive">Active (visible on website)</label>
                 </div>
               </div>
             </div>
-            
+
+            {/* Custom Specifications */}
+            {renderCustomSpecificationsUI()}
+
+            {/* Package Points */}
+            {renderPackagePointsUI()}
+
             <div className="form-section">
               <h3>Category Image</h3>
-              
               <div className="form-group">
                 <label>Category Image</label>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={handleImageChange}
-                />
-                
-                {isUploading && (
-                  <div className="upload-progress">
-                    <div 
-                      className="progress-bar" 
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                    <span>{uploadProgress}%</span>
-                  </div>
-                )}
-                
-                {imagePreview && (
-                  <div className="image-preview">
-                    <img src={imagePreview} alt="Category Preview" />
-                  </div>
-                )}
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageChange} />
+                {isUploading && <div className="upload-progress"><div className="progress-bar" style={{ width: `${uploadProgress}%` }}></div><span>{uploadProgress}%</span></div>}
+                {imagePreview && <div className="image-preview"><img src={imagePreview} alt="Category Preview" /></div>}
               </div>
             </div>
-            
             <div className="form-actions">
-              <button 
-                type="button" 
-                className="cancel-btn" 
-                onClick={resetForm}
-              >
-                Cancel
-              </button>
-              
-              <button 
-                type="submit" 
-                className="submit-btn"
-                disabled={isUploading}
-              >
-                {formMode === 'add' ? 'Add Category' : 'Update Category'}
-              </button>
+              <button type="button" className="cancel-btn" onClick={resetForm}>Cancel</button>
+              <button type="submit" className="submit-btn" disabled={isUploading}>{formMode === 'add' ? 'Add Category' : 'Update Category'}</button>
             </div>
           </form>
+          {formMode === 'edit' && <SpecificationComponent itemData={{
+            ...categoryFormData, 
+            customSpecifications, 
+            packagePoints
+          }} itemType="categories" />}
         </div>
       )}
-      
-      {/* Category Item Form */}
+
       {activeMode === 'categoryItems' && (
         <div className="card form-card">
           <h2>{formMode === 'add' ? 'Add New Category Item' : 'Edit Category Item'}</h2>
-          
           <form onSubmit={handleFormSubmit}>
             <div className="form-section">
               <h3>Category Selection</h3>
-              
               <div className="form-group">
                 <label>Select Category</label>
-                <select
-                  name="categoryId"
-                  value={categoryItemFormData.categoryId}
-                  onChange={handleCategoryItemInputChange}
-                  required
-                >
+                <select name="categoryId" value={categoryItemFormData.categoryId} onChange={handleCategoryItemInputChange} required>
                   <option value="">-- Select a Category --</option>
-                  {categories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
+                  {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
                 </select>
               </div>
             </div>
-            
             <div className="form-section">
               <h3>Basic Information</h3>
-              
               <div className="form-group">
                 <label>Item Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={categoryItemFormData.name}
-                  onChange={handleCategoryItemInputChange}
-                  placeholder="ESP32 Development Board"
-                  required
-                />
+                <input type="text" name="name" value={categoryItemFormData.name} onChange={handleCategoryItemInputChange} placeholder="ESP32 Development Board" required />
               </div>
-              
               <div className="form-group">
-                <label>Price (₹)</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={categoryItemFormData.price}
-                  onChange={handleCategoryItemInputChange}
-                  placeholder="450"
-                  step="0.01"
-                  min="0"
-                  required
+                <label>Original Price (₹)</label>
+                <input 
+                  type="number" 
+                  name="originalPrice" 
+                  value={categoryItemFormData.originalPrice} 
+                  onChange={handleCategoryItemInputChange} 
+                  placeholder="500" 
+                  step="0.01" 
+                  min="0" 
+                  required 
                 />
               </div>
-              
+              <div className="form-group">
+                <label>Discount Percentage (%)</label>
+                <input 
+                  type="number" 
+                  name="discountPercentage" 
+                  value={categoryItemFormData.discountPercentage} 
+                  onChange={handleCategoryItemInputChange} 
+                  placeholder="10" 
+                  step="0.01" 
+                  min="0" 
+                  max="100" 
+                />
+              </div>
+              <div className="form-group">
+                <label>Selling Price (₹)</label>
+                <input 
+                  type="number" 
+                  name="price" 
+                  value={categoryItemFormData.price} 
+                  onChange={handleCategoryItemInputChange} 
+                  placeholder="450" 
+                  step="0.01" 
+                  min="0" 
+                  required 
+                  readOnly={categoryItemFormData.originalPrice && categoryItemFormData.discountPercentage > 0}
+                  className={categoryItemFormData.originalPrice && categoryItemFormData.discountPercentage > 0 ? "calculated-price" : ""}
+                />
+                {categoryItemFormData.originalPrice && categoryItemFormData.discountPercentage > 0 && (
+                  <small className="price-info">Calculated based on original price and discount</small>
+                )}
+              </div>
               <div className="form-group">
                 <label>Short Description</label>
-                <textarea
-                  name="description"
-                  value={categoryItemFormData.description}
-                  onChange={handleCategoryItemInputChange}
-                  placeholder="ESP32 is a powerful, low-cost microcontroller with integrated Wi-Fi and Bluetooth."
-                  rows="2"
-                  required
-                />
+                <textarea name="description" value={categoryItemFormData.description} onChange={handleCategoryItemInputChange} placeholder="ESP32 is a powerful, low-cost microcontroller..." rows="2" required />
               </div>
-              
               <div className="form-group">
                 <label>Full Description</label>
-                <textarea
-                  name="fullDescription"
-                  value={categoryItemFormData.fullDescription}
-                  onChange={handleCategoryItemInputChange}
-                  placeholder="Detailed item description that will appear in the item details modal..."
-                  rows="4"
-                />
+                <textarea name="fullDescription" value={categoryItemFormData.fullDescription} onChange={handleCategoryItemInputChange} placeholder="Detailed item description..." rows="4" />
               </div>
             </div>
-            
             <div className="form-section">
               <h3>Item Image</h3>
-              
               <div className="form-group">
                 <label>Item Image</label>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={handleImageChange}
-                />
-                
-                {isUploading && (
-                  <div className="upload-progress">
-                    <div 
-                      className="progress-bar" 
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                    <span>{uploadProgress}%</span>
-                  </div>
-                )}
-                
-                {imagePreview && (
-                  <div className="image-preview">
-                    <img src={imagePreview} alt="Item Preview" />
-                  </div>
-                )}
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageChange} />
+                {isUploading && <div className="upload-progress"><div className="progress-bar" style={{ width: `${uploadProgress}%` }}></div><span>{uploadProgress}%</span></div>}
+                {imagePreview && <div className="image-preview"><img src={imagePreview} alt="Item Preview" /></div>}
               </div>
             </div>
-            
             <div className="form-section">
               <h3>Specifications</h3>
-              
               <div className="form-row">
                 <div className="form-group half">
-                  <label>Material</label>
-                  <input
-                    type="text"
-                    name="material"
-                    value={categoryItemFormData.material}
-                    onChange={handleCategoryItemInputChange}
-                    placeholder="High-grade PCB"
-                  />
+                  <label>Microcontroller</label>
+                  <input type="text" name="microcontroller" value={categoryItemFormData.microcontroller} onChange={handleCategoryItemInputChange} placeholder="ESP32" />
                 </div>
-                
                 <div className="form-group half">
-                  <label>Dimensions</label>
-                  <input
-                    type="text"
-                    name="dimensions"
-                    value={categoryItemFormData.dimensions}
-                    onChange={handleCategoryItemInputChange}
-                    placeholder="60mm x 28mm x 13mm"
-                  />
+                  <label>Operating Voltage</label>
+                  <input type="text" name="operatingVoltage" value={categoryItemFormData.operatingVoltage} onChange={handleCategoryItemInputChange} placeholder="3.3V" />
                 </div>
               </div>
-              
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Input Voltage (Recommended)</label>
+                  <input type="text" name="inputVoltageRecommended" value={categoryItemFormData.inputVoltageRecommended} onChange={handleCategoryItemInputChange} placeholder="7-12V" />
+                </div>
+                <div className="form-group half">
+                  <label>Input Voltage (Limits)</label>
+                  <input type="text" name="inputVoltageLimits" value={categoryItemFormData.inputVoltageLimits} onChange={handleCategoryItemInputChange} placeholder="5-20V" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Digital I/O Pins</label>
+                  <input type="text" name="digitalIOPins" value={categoryItemFormData.digitalIOPins} onChange={handleCategoryItemInputChange} placeholder="34" />
+                </div>
+                <div className="form-group half">
+                  <label>Analog Input Pins</label>
+                  <input type="text" name="analogInputPins" value={categoryItemFormData.analogInputPins} onChange={handleCategoryItemInputChange} placeholder="18" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>PWM Channels</label>
+                  <input type="text" name="pwmChannels" value={categoryItemFormData.pwmChannels} onChange={handleCategoryItemInputChange} placeholder="16" />
+                </div>
+                <div className="form-group half">
+                  <label>Clock Speed</label>
+                  <input type="text" name="clockSpeed" value={categoryItemFormData.clockSpeed} onChange={handleCategoryItemInputChange} placeholder="240 MHz" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Flash Memory</label>
+                  <input type="text" name="flashMemory" value={categoryItemFormData.flashMemory} onChange={handleCategoryItemInputChange} placeholder="4 MB" />
+                </div>
+                <div className="form-group half">
+                  <label>SRAM</label>
+                  <input type="text" name="sram" value={categoryItemFormData.sram} onChange={handleCategoryItemInputChange} placeholder="520 KB" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>EEPROM</label>
+                  <input type="text" name="eeprom" value={categoryItemFormData.eeprom} onChange={handleCategoryItemInputChange} placeholder="No dedicated EEPROM" />
+                </div>
+                <div className="form-group half">
+                  <label>USB Interface</label>
+                  <input type="text" name="usbInterface" value={categoryItemFormData.usbInterface} onChange={handleCategoryItemInputChange} placeholder="USB-C" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Communication Interfaces</label>
+                  <input type="text" name="communicationInterfaces" value={categoryItemFormData.communicationInterfaces} onChange={handleCategoryItemInputChange} placeholder="Wi-Fi, Bluetooth, UART, SPI, I2C" />
+                </div>
+                <div className="form-group half">
+                  <label>Dimensions</label>
+                  <input type="text" name="dimensions" value={categoryItemFormData.dimensions} onChange={handleCategoryItemInputChange} placeholder="60mm x 28mm x 13mm" />
+                </div>
+              </div>
               <div className="form-row">
                 <div className="form-group half">
                   <label>Weight</label>
-                  <input
-                    type="text"
-                    name="weight"
-                    value={categoryItemFormData.weight}
-                    onChange={handleCategoryItemInputChange}
-                    placeholder="25g"
-                  />
+                  <input type="text" name="weight" value={categoryItemFormData.weight} onChange={handleCategoryItemInputChange} placeholder="25g" />
                 </div>
-                
+                <div className="form-group half">
+                  <label>Operating Temperature</label>
+                  <input type="text" name="operatingTemperature" value={categoryItemFormData.operatingTemperature} onChange={handleCategoryItemInputChange} placeholder="-40°C to 85°C" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Power Consumption</label>
+                  <input type="text" name="powerConsumption" value={categoryItemFormData.powerConsumption} onChange={handleCategoryItemInputChange} placeholder="Variable, sleep modes available" />
+                </div>
+                <div className="form-group half">
+                  <label>LED Indicators</label>
+                  <input type="text" name="ledIndicators" value={categoryItemFormData.ledIndicators} onChange={handleCategoryItemInputChange} placeholder="Power LED, Status LED" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group half">
+                  <label>Material</label>
+                  <input type="text" name="material" value={categoryItemFormData.material} onChange={handleCategoryItemInputChange} placeholder="High-grade PCB" />
+                </div>
                 <div className="form-group half">
                   <label>Warranty</label>
-                  <input
-                    type="text"
-                    name="warranty"
-                    value={categoryItemFormData.warranty}
-                    onChange={handleCategoryItemInputChange}
-                    placeholder="1 year"
-                  />
+                  <input type="text" name="warranty" value={categoryItemFormData.warranty} onChange={handleCategoryItemInputChange} placeholder="1 year" />
                 </div>
               </div>
             </div>
-            
+
+            {/* Custom Specifications */}
+            {renderCustomSpecificationsUI()}
+
+            {/* Package Points */}
+            {renderPackagePointsUI()}
+
             <div className="form-section">
               <h3>Display Options</h3>
-              
               <div className="form-group">
                 <label>Delivery Speed</label>
                 <div className="delivery-speed-options">
-                  <label className="radio-container">
-                    <input
-                      type="radio"
-                      name="deliverySpeed"
-                      value="quick"
-                      checked={categoryItemFormData.deliverySpeed === 'quick'}
-                      onChange={handleCategoryItemInputChange}
-                    />
-                    <span className="radio-label">Quick</span>
-                  </label>
-                  
-                  <label className="radio-container">
-                    <input
-                      type="radio"
-                      name="deliverySpeed"
-                      value="normal"
-                      checked={categoryItemFormData.deliverySpeed === 'normal'}
-                      onChange={handleCategoryItemInputChange}
-                    />
-                    <span className="radio-label">Normal</span>
-                  </label>
-                  
-                  <label className="radio-container">
-                    <input
-                      type="radio"
-                      name="deliverySpeed"
-                      value="late"
-                      checked={categoryItemFormData.deliverySpeed === 'late'}
-                      onChange={handleCategoryItemInputChange}
-                    />
-                    <span className="radio-label">Late</span>
-                  </label>
+                  {['quick', 'normal', 'late'].map(speed => (
+                    <label className="radio-container" key={speed}>
+                      <input type="radio" name="deliverySpeed" value={speed} checked={categoryItemFormData.deliverySpeed === speed} onChange={handleCategoryItemInputChange} />
+                      <span className="radio-label">{speed.charAt(0).toUpperCase() + speed.slice(1)}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
-              
               <div className="form-group">
                 <div className="checkbox-container">
-                  <input
-                    type="checkbox"
-                    name="active"
-                    id="itemActive"
-                    checked={categoryItemFormData.active}
-                    onChange={handleCategoryItemInputChange}
-                  />
+                  <input type="checkbox" name="active" id="itemActive" checked={categoryItemFormData.active} onChange={handleCategoryItemInputChange} />
                   <label htmlFor="itemActive">Active (visible on website)</label>
                 </div>
               </div>
             </div>
-            
             <div className="form-actions">
-              <button 
-                type="button" 
-                className="cancel-btn" 
-                onClick={resetForm}
-              >
-                Cancel
-              </button>
-              
-              <button 
-                type="submit" 
-                className="submit-btn"
-                disabled={isUploading}
-              >
-                {formMode === 'add' ? 'Add Item' : 'Update Item'}
-              </button>
+              <button type="button" className="cancel-btn" onClick={resetForm}>Cancel</button>
+              <button type="submit" className="submit-btn" disabled={isUploading}>{formMode === 'add' ? 'Add Item' : 'Update Item'}</button>
             </div>
           </form>
+          {formMode === 'edit' && <SpecificationComponent itemData={{
+            ...categoryItemFormData, 
+            customSpecifications, 
+            packagePoints
+          }} itemType="categoryItems" />}
         </div>
       )}
-      
-      {/* View All Button */}
+
       <div className="view-all-section">
-        <button className="view-all-btn" onClick={handleViewAllItems}>
-          View All Items
-        </button>
+        <button className="view-all-btn" onClick={handleViewAllItems}>View All Items</button>
       </div>
-      
-      {/* Products List */}
+
       {activeMode === 'trending' && (
         <div className="card table-card">
           <h2>Recently Added Trending Components</h2>
-          
-          {loading ? (
-            <div className="loading">Loading products...</div>
-          ) : (
+          {loading ? <div className="loading">Loading products...</div> : (
             <div className="products-list">
-              {products.length > 0 ? (
-                products.slice(0, 3).map(product => (
-                  <div className="product-item" key={product.id}>
-                    <div className="product-preview">
-                      {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.name} />
-                      ) : (
-                        <div className="no-image">No Image</div>
-                      )}
-                    </div>
-                    
-                    <div className="product-details">
-                      <h3>{product.name || 'Untitled Product'}</h3>
-                      <p className="product-price">₹{product.price ? product.price.toFixed(2) : '0.00'}</p>
-                      <p>{product.description || 'No description'}</p>
-                      
-                      <div className="status-badge">
-                        <span className={product.active ? 'active' : 'inactive'}>
-                          {product.active ? 'Active' : 'Inactive'}
-                        </span>
-                        <span className={`delivery-badge ${product.deliverySpeed || 'normal'}`}>
-                          {product.deliverySpeed ? product.deliverySpeed.charAt(0).toUpperCase() + product.deliverySpeed.slice(1) : 'Normal'}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="product-actions">
-                      <button 
-                        className={`status-toggle-btn ${product.active ? 'deactivate' : 'activate'}`}
-                        onClick={() => toggleItemStatus(product.id, product.active, 'trending')}
-                      >
-                        {product.active ? 'Deactivate' : 'Activate'}
-                      </button>
-                      
-                      <button 
-                        className="edit-btn"
-                        onClick={() => handleEditItem(product, 'trending')}
-                      >
-                        <i className="fas fa-edit"></i> Edit
-                      </button>
-                      
-                      <button 
-                        className="delete-btn"
-                        onClick={() => handleDeleteItem(product.id, product.imageUrl, 'trending')}
-                      >
-                        <i className="fas fa-trash"></i> Delete
-                      </button>
+              {products.slice(0, 3).map(product => (
+                <div className="product-item" key={product.id}>
+                  <div className="product-preview">{product.imageUrl ? <img src={product.imageUrl} alt={product.name} /> : <div className="no-image">No Image</div>}</div>
+                  <div className="product-details">
+                    <h3>{product.name || 'Untitled Product'}</h3>
+                    <p className="product-price">
+                      {product.originalPrice && product.originalPrice > product.price ? (
+                        <>
+                          <span className="original-price">₹{product.originalPrice.toFixed(2)}</span>
+                          <span className="discount-badge">-{product.discountPercentage}%</span>
+                        </>
+                      ) : null}
+                      <span className="selling-price">₹{product.price ? product.price.toFixed(2) : '0.00'}</span>
+                    </p>
+                    <p>{product.description || 'No description'}</p>
+                    <div className="status-badge">
+                      <span className={product.active ? 'active' : 'inactive'}>{product.active ? 'Active' : 'Inactive'}</span>
+                      <span className={`delivery-badge ${product.deliverySpeed || 'normal'}`}>
+                        {product.deliverySpeed ? product.deliverySpeed.charAt(0).toUpperCase() + product.deliverySpeed.slice(1) : 'Normal'}
+                      </span>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="no-data">No products found. Add your first product above.</div>
-              )}
-              
-              {products.length > 3 && (
-                <div className="view-more">
-                  <button className="view-more-btn" onClick={handleViewAllItems}>
-                    View All Trending Components ({products.length})
-                  </button>
+                  <div className="product-actions">
+                    <button className={`status-toggle-btn ${product.active ? 'deactivate' : 'activate'}`} onClick={() => toggleItemStatus(product.id, product.active, 'trending')}>
+                      {product.active ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button className="edit-btn" onClick={() => handleEditItem(product, 'trending')}><i className="fas fa-edit"></i> Edit</button>
+                    <button className="delete-btn" onClick={() => handleDeleteItem(product.id, product.imageUrl, 'trending')}><i className="fas fa-trash"></i> Delete</button>
+                  </div>
                 </div>
-              )}
+              ))}
+              {products.length > 3 && <div className="view-more"><button className="view-more-btn" onClick={handleViewAllItems}>View All Trending Components ({products.length})</button></div>}
             </div>
           )}
         </div>
       )}
-      
-      {/* Categories List */}
+
       {activeMode === 'categories' && (
         <div className="card table-card">
           <h2>Recently Added Categories</h2>
-          
-          {loading ? (
-            <div className="loading">Loading categories...</div>
-          ) : (
+          {loading ? <div className="loading">Loading categories...</div> : (
             <div className="categories-list">
-              {categories.length > 0 ? (
-                categories.slice(0, 3).map(category => (
-                  <div className="category-item" key={category.id}>
-                    <div className="category-preview">
-                      {category.imageUrl ? (
-                        <img src={category.imageUrl} alt={category.name} />
-                      ) : (
-                        <div className="no-image">No Image</div>
-                      )}
-                    </div>
-                    
-                    <div className="category-details">
-                      <h3>{category.name || 'Untitled Category'}</h3>
-                      <p>{category.description || 'No description'}</p>
-                      
-                      <div className="status-badge">
-                        <span className={category.active ? 'active' : 'inactive'}>
-                          {category.active ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="category-actions">
-                      <button 
-                        className={`status-toggle-btn ${category.active ? 'deactivate' : 'activate'}`}
-                        onClick={() => toggleItemStatus(category.id, category.active, 'categories')}
-                      >
-                        {category.active ? 'Deactivate' : 'Activate'}
-                      </button>
-                      
-                      <button 
-                        className="edit-btn"
-                        onClick={() => handleEditItem(category, 'categories')}
-                      >
-                        <i className="fas fa-edit"></i> Edit
-                      </button>
-                      
-                      <button 
-                        className="delete-btn"
-                        onClick={() => handleDeleteItem(category.id, category.imageUrl, 'categories')}
-                      >
-                        <i className="fas fa-trash"></i> Delete
-                      </button>
-                    </div>
+              {categories.slice(0, 3).map(category => (
+                <div className="category-item" key={category.id}>
+                  <div className="category-preview">{category.imageUrl ? <img src={category.imageUrl} alt={category.name} /> : <div className="no-image">No Image</div>}</div>
+                  <div className="category-details">
+                    <h3>{category.name || 'Untitled Category'}</h3>
+                    <p>{category.description || 'No description'}</p>
+                    <div className="status-badge"><span className={category.active ? 'active' : 'inactive'}>{category.active ? 'Active' : 'Inactive'}</span></div>
                   </div>
-                ))
-              ) : (
-                <div className="no-data">No categories found. Add your first category above.</div>
-              )}
-              
-              {categories.length > 3 && (
-                <div className="view-more">
-                  <button className="view-more-btn" onClick={handleViewAllItems}>
-                    View All Categories ({categories.length})
-                  </button>
+                  <div className="category-actions">
+                    <button className={`status-toggle-btn ${category.active ? 'deactivate' : 'activate'}`} onClick={() => toggleItemStatus(category.id, category.active, 'categories')}>
+                      {category.active ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button className="edit-btn" onClick={() => handleEditItem(category, 'categories')}><i className="fas fa-edit"></i> Edit</button>
+                    <button className="delete-btn" onClick={() => handleDeleteItem(category.id, category.imageUrl, 'categories')}><i className="fas fa-trash"></i> Delete</button>
+                  </div>
                 </div>
-              )}
+              ))}
+              {categories.length > 3 && <div className="view-more"><button className="view-more-btn" onClick={handleViewAllItems}>View All Categories ({categories.length})</button></div>}
             </div>
           )}
         </div>
       )}
-      
-      {/* Category Items List */}
+
       {activeMode === 'categoryItems' && (
         <div className="card table-card">
           <h2>Recently Added Category Items</h2>
-          
-          {loading ? (
-            <div className="loading">Loading category items...</div>
-          ) : (
+          {loading ? <div className="loading">Loading category items...</div> : (
             <div className="category-items-list">
-              {categoryItems.length > 0 ? (
-                categoryItems.slice(0, 3).map(item => (
-                  <div className="category-item-row" key={item.id}>
-                    <div className="item-preview">
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.name} />
-                      ) : (
-                        <div className="no-image">No Image</div>
-                      )}
-                    </div>
-                    
-                    <div className="item-details">
-                      <h3>{item.name || 'Untitled Item'}</h3>
-                      <p className="item-category">Category: {item.categoryName || 'Unknown'}</p>
-                      <p className="item-price">₹{item.price ? item.price.toFixed(2) : '0.00'}</p>
-                      <p>{item.description || 'No description'}</p>
-                      
-                      <div className="status-badge">
-                        <span className={item.active ? 'active' : 'inactive'}>
-                          {item.active ? 'Active' : 'Inactive'}
-                        </span>
-                        <span className={`delivery-badge ${item.deliverySpeed || 'normal'}`}>
-                          {item.deliverySpeed ? item.deliverySpeed.charAt(0).toUpperCase() + item.deliverySpeed.slice(1) : 'Normal'}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="item-actions">
-                      <button 
-                        className={`status-toggle-btn ${item.active ? 'deactivate' : 'activate'}`}
-                        onClick={() => toggleItemStatus(item.id, item.active, 'categoryItems')}
-                      >
-                        {item.active ? 'Deactivate' : 'Activate'}
-                      </button>
-                      
-                      <button 
-                        className="edit-btn"
-                        onClick={() => handleEditItem(item, 'categoryItems')}
-                      >
-                        <i className="fas fa-edit"></i> Edit
-                      </button>
-                      
-                      <button 
-                        className="delete-btn"
-                        onClick={() => handleDeleteItem(item.id, item.imageUrl, 'categoryItems')}
-                      >
-                        <i className="fas fa-trash"></i> Delete
-                      </button>
+              {categoryItems.slice(0, 3).map(item => (
+                <div className="category-item-row" key={item.id}>
+                  <div className="item-preview">{item.imageUrl ? <img src={item.imageUrl} alt={item.name} /> : <div className="no-image">No Image</div>}</div>
+                  <div className="item-details">
+                    <h3>{item.name || 'Untitled Item'}</h3>
+                    <p className="item-category">Category: {item.categoryName || 'Unknown'}</p>
+                    <p className="item-price">
+                      {item.originalPrice && item.originalPrice > item.price ? (
+                        <>
+                          <span className="original-price">₹{item.originalPrice.toFixed(2)}</span>
+                          <span className="discount-badge">-{item.discountPercentage}%</span>
+                        </>
+                      ) : null}
+                      <span className="selling-price">₹{item.price ? item.price.toFixed(2) : '0.00'}</span>
+                    </p>
+                    <p>{item.description || 'No description'}</p>
+                    <div className="status-badge">
+                      <span className={item.active ? 'active' : 'inactive'}>{item.active ? 'Active' : 'Inactive'}</span>
+                      <span className={`delivery-badge ${item.deliverySpeed || 'normal'}`}>
+                        {item.deliverySpeed ? item.deliverySpeed.charAt(0).toUpperCase() + item.deliverySpeed.slice(1) : 'Normal'}
+                      </span>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="no-data">No category items found. Add your first item above.</div>
-              )}
-              
-              {categoryItems.length > 3 && (
-                <div className="view-more">
-                  <button className="view-more-btn" onClick={handleViewAllItems}>
-                    View All Category Items ({categoryItems.length})
-                  </button>
+                  <div className="item-actions">
+                    <button className={`status-toggle-btn ${item.active ? 'deactivate' : 'activate'}`} onClick={() => toggleItemStatus(item.id, item.active, 'categoryItems')}>
+                      {item.active ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button className="edit-btn" onClick={() => handleEditItem(item, 'categoryItems')}><i className="fas fa-edit"></i> Edit</button>
+                    <button className="delete-btn" onClick={() => handleDeleteItem(item.id, item.imageUrl, 'categoryItems')}><i className="fas fa-trash"></i> Delete</button>
+                  </div>
                 </div>
-              )}
+              ))}
+              {categoryItems.length > 3 && <div className="view-more"><button className="view-more-btn" onClick={handleViewAllItems}>View All Category Items ({categoryItems.length})</button></div>}
             </div>
           )}
         </div>
