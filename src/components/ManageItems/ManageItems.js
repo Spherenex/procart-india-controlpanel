@@ -685,7 +685,7 @@ const ManageItems = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const productsQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+      const productsQuery = query(collection(db, 'products'), orderBy('updatedAt', 'desc'));
       const querySnapshot = await getDocs(productsQuery);
       
       const productsData = querySnapshot.docs.map(doc => ({
@@ -696,7 +696,19 @@ const ManageItems = () => {
       setProducts(productsData);
     } catch (error) {
       console.error('Error fetching products:', error);
-      alert('Failed to load products. Please check your connection and try again.');
+      // Fallback to createdAt if updatedAt doesn't exist
+      try {
+        const fallbackQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+        const fallbackSnapshot = await getDocs(fallbackQuery);
+        const fallbackData = fallbackSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setProducts(fallbackData);
+      } catch (fallbackError) {
+        console.error('Error with fallback query:', fallbackError);
+        alert('Failed to load products. Please check your connection and try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -706,7 +718,7 @@ const ManageItems = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const categoriesQuery = query(collection(db, 'categories'), orderBy('createdAt', 'desc'));
+      const categoriesQuery = query(collection(db, 'categories'), orderBy('updatedAt', 'desc'));
       const querySnapshot = await getDocs(categoriesQuery);
       
       const categoriesData = querySnapshot.docs.map(doc => ({
@@ -717,7 +729,19 @@ const ManageItems = () => {
       setCategories(categoriesData);
     } catch (error) {
       console.error('Error fetching categories:', error);
-      alert('Failed to load categories. Please check your connection and try again.');
+      // Fallback to createdAt if updatedAt doesn't exist
+      try {
+        const fallbackQuery = query(collection(db, 'categories'), orderBy('createdAt', 'desc'));
+        const fallbackSnapshot = await getDocs(fallbackQuery);
+        const fallbackData = fallbackSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setCategories(fallbackData);
+      } catch (fallbackError) {
+        console.error('Error with fallback query:', fallbackError);
+        alert('Failed to load categories. Please check your connection and try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -731,12 +755,12 @@ const ManageItems = () => {
       let categoryItemsQuery;
       
       if (selectedCategory === 'all') {
-        categoryItemsQuery = query(collection(db, 'categoryItems'), orderBy('createdAt', 'desc'));
+        categoryItemsQuery = query(collection(db, 'categoryItems'), orderBy('updatedAt', 'desc'));
       } else {
         categoryItemsQuery = query(
           collection(db, 'categoryItems'), 
           where('categoryId', '==', selectedCategory),
-          orderBy('createdAt', 'desc')
+          orderBy('updatedAt', 'desc')
         );
       }
       
@@ -750,7 +774,28 @@ const ManageItems = () => {
       setCategoryItems(categoryItemsData);
     } catch (error) {
       console.error('Error fetching category items:', error);
-      alert('Failed to load category items. Please check your connection and try again.');
+      // Fallback to createdAt if updatedAt doesn't exist
+      try {
+        let fallbackQuery;
+        if (selectedCategory === 'all') {
+          fallbackQuery = query(collection(db, 'categoryItems'), orderBy('createdAt', 'desc'));
+        } else {
+          fallbackQuery = query(
+            collection(db, 'categoryItems'), 
+            where('categoryId', '==', selectedCategory),
+            orderBy('createdAt', 'desc')
+          );
+        }
+        const fallbackSnapshot = await getDocs(fallbackQuery);
+        const fallbackData = fallbackSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setCategoryItems(fallbackData);
+      } catch (fallbackError) {
+        console.error('Error with fallback query:', fallbackError);
+        alert('Failed to load category items. Please check your connection and try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -1287,308 +1332,275 @@ const ManageItems = () => {
               <div className="details-info">
                 <h2>{viewItemDetails.item.name || 'Untitled'}</h2>
                 
-                <div className="detail-row">
-                  <span className="detail-label">ID:</span>
-                  <span className="detail-value">{viewItemDetails.item.id}</span>
+                {/* Basic Information */}
+                <div className="detail-section">
+                  <h4>Basic Information</h4>
+                  
+                  <div className="detail-row">
+                    <span className="detail-label">ID:</span>
+                    <span className="detail-value">{viewItemDetails.item.id || 'N/A'}</span>
+                  </div>
+                  
+                  {viewItemDetails.type !== 'categories' && (
+                    <div className="detail-row">
+                      <span className="detail-label">Price:</span>
+                      <span className="detail-value">₹{viewItemDetails.item.price ? viewItemDetails.item.price.toFixed(2) : '0.00'}</span>
+                    </div>
+                  )}
+                  
+                  {viewItemDetails.item.originalPrice && viewItemDetails.item.originalPrice !== viewItemDetails.item.price && (
+                    <div className="detail-row">
+                      <span className="detail-label">Original Price:</span>
+                      <span className="detail-value">₹{viewItemDetails.item.originalPrice.toFixed(2)}</span>
+                    </div>
+                  )}
+                  
+                  {viewItemDetails.item.discountPercentage && (
+                    <div className="detail-row">
+                      <span className="detail-label">Discount:</span>
+                      <span className="detail-value">{viewItemDetails.item.discountPercentage}%</span>
+                    </div>
+                  )}
+                  
+                  {viewItemDetails.type === 'categoryItems' && (
+                    <>
+                      <div className="detail-row">
+                        <span className="detail-label">Category:</span>
+                        <span className="detail-value">{viewItemDetails.item.categoryName || 'Unknown'}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="detail-label">Category ID:</span>
+                        <span className="detail-value">{viewItemDetails.item.categoryId || 'N/A'}</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {viewItemDetails.type === 'categories' && (
+                    <div className="detail-row">
+                      <span className="detail-label">Items Count:</span>
+                      <span className="detail-value">{viewItemDetails.item.itemsCount || 0}</span>
+                    </div>
+                  )}
+                  
+                  <div className="detail-row">
+                    <span className="detail-label">Status:</span>
+                    <span className={`detail-value status-badge ${viewItemDetails.item.active ? 'active' : 'inactive'}`}>
+                      {viewItemDetails.item.active ? 'Active' : 'Inactive'}
+                    </span>
+                    {viewItemDetails.item.isQuick && (
+                      <span className="quick-badge">Quick</span>
+                    )}
+                  </div>
                 </div>
-                
-                {viewItemDetails.type !== 'categories' && (
-                  <div className="detail-row">
-                    <span className="detail-label">Price:</span>
-                    <span className="detail-value">₹{viewItemDetails.item.price ? viewItemDetails.item.price.toFixed(2) : '0.00'}</span>
-                  </div>
-                )}
-                
-                {viewItemDetails.type === 'categoryItems' && (
-                  <div className="detail-row">
-                    <span className="detail-label">Category:</span>
-                    <span className="detail-value">{viewItemDetails.item.categoryName || 'Unknown'}</span>
-                  </div>
-                )}
 
-                {viewItemDetails.type === 'categoryItems' && viewItemDetails.item.categoryId && (
+                {/* Timestamps */}
+                <div className="detail-section">
+                  <h4>Timestamps</h4>
+                  
                   <div className="detail-row">
-                    <span className="detail-label">Category ID:</span>
-                    <span className="detail-value">{viewItemDetails.item.categoryId}</span>
+                    <span className="detail-label">Created:</span>
+                    <span className="detail-value">{formatDate(viewItemDetails.item.createdAt)}</span>
                   </div>
-                )}
-                
-                {viewItemDetails.type === 'categories' && (
+                  
                   <div className="detail-row">
-                    <span className="detail-label">Items Count:</span>
-                    <span className="detail-value">{viewItemDetails.item.itemsCount || 0}</span>
+                    <span className="detail-label">Last Updated:</span>
+                    <span className="detail-value">{formatDate(viewItemDetails.item.updatedAt)}</span>
                   </div>
-                )}
-                
-                <div className="detail-row">
-                  <span className="detail-label">Status:</span>
-                  <span className={`detail-value status-badge ${viewItemDetails.item.active ? 'active' : 'inactive'}`}>
-                    {viewItemDetails.item.active ? 'Active' : 'Inactive'}
-                  </span>
-                  {viewItemDetails.item.isQuick && (
-                    <span className="quick-badge">Quick</span>
+                  
+                  {viewItemDetails.item.trendingSince && (
+                    <div className="detail-row">
+                      <span className="detail-label">Trending Since:</span>
+                      <span className="detail-value">{formatDate(viewItemDetails.item.trendingSince)}</span>
+                    </div>
                   )}
                 </div>
-                
-                <div className="detail-row">
-                  <span className="detail-label">Created:</span>
-                  <span className="detail-value">{formatDate(viewItemDetails.item.createdAt)}</span>
-                </div>
-                
-                <div className="detail-row">
-                  <span className="detail-label">Last Updated:</span>
-                  <span className="detail-value">{formatDate(viewItemDetails.item.updatedAt)}</span>
-                </div>
-                
-                <div className="detail-row description">
-                  <span className="detail-label">Description:</span>
-                  <div className="detail-value description-text">
-                    {viewItemDetails.item.description || 'No description available.'}
+
+                {/* Description */}
+                <div className="detail-section">
+                  <h4>Description</h4>
+                  <div className="detail-row description">
+                    <div className="detail-value description-text">
+                      {viewItemDetails.item.description || 'No description available.'}
+                    </div>
                   </div>
                 </div>
                 
                 {/* Technical specifications section */}
-                {viewItemDetails.item.technicalSpecs && (
-                  <div className="detail-row">
-                    <span className="detail-label">Technical Specs:</span>
-                    <div className="detail-value">
-                      <ul className="specifications-list">
-                        {Object.entries(viewItemDetails.item.technicalSpecs).map(([key, value]) => (
-                          <li key={key}><strong>{key}:</strong> {value}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-
-                
-                {/* For trending components or category items with additional fields */}
-      
-                
-                {viewItemDetails.item.specifications && (
-                  <div className="detail-row">
-                    <span className="detail-label">Specifications:</span>
-                    <div className="detail-value">
-                      <ul className="specifications-list">
-                        {Object.entries(viewItemDetails.item.specifications).map(([key, value]) => (
-                          <li key={key}><strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}</li>
-                        ))}
-                      </ul>
+                {viewItemDetails.item.technicalSpecs && Object.keys(viewItemDetails.item.technicalSpecs).length > 0 && (
+                  <div className="detail-section">
+                    <h4>Technical Specifications</h4>
+                    <div className="detail-row">
+                      <div className="detail-value">
+                        <ul className="specifications-list">
+                          {Object.entries(viewItemDetails.item.technicalSpecs).map(([key, value]) => (
+                            <li key={key}><strong>{key}:</strong> {value}</li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 )}
                 
+                {/* Product specifications section */}
+                {viewItemDetails.item.specifications && Object.keys(viewItemDetails.item.specifications).length > 0 && (
+                  <div className="detail-section">
+                    <h4>Product Specifications</h4>
+                    <div className="detail-row">
+                      <div className="detail-value">
+                        <ul className="specifications-list">
+                          {Object.entries(viewItemDetails.item.specifications).map(([key, value]) => (
+                            <li key={key}><strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : value}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Features section */}
                 {viewItemDetails.item.features && viewItemDetails.item.features.length > 0 && (
-                  <div className="detail-row">
-                    <span className="detail-label">Features:</span>
-                    <div className="detail-value">
-                      <ul className="features-list">
-                        {viewItemDetails.item.features.map((feature, index) => (
-                          <li key={index}>{feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.colors && viewItemDetails.item.colors.length > 0 && (
-                  <div className="detail-row">
-                    <span className="detail-label">Available Colors:</span>
-                    <div className="detail-value">
-                      <div className="colors-list">
-                        {viewItemDetails.item.colors.map((color, index) => (
-                          <div 
-                            key={index} 
-                            className="color-item" 
-                            style={{ backgroundColor: color }}
-                            title={color}
-                          ></div>
-                        ))}
+                  <div className="detail-section">
+                    <h4>Features</h4>
+                    <div className="detail-row">
+                      <div className="detail-value">
+                        <ul className="features-list">
+                          {viewItemDetails.item.features.map((feature, index) => (
+                            <li key={index}>{feature}</li>
+                          ))}
+                        </ul>
                       </div>
                     </div>
                   </div>
                 )}
                 
-                {viewItemDetails.item.sizes && viewItemDetails.item.sizes.length > 0 && (
-                  <div className="detail-row">
-                    <span className="detail-label">Available Sizes:</span>
-                    <div className="detail-value">
-                      {viewItemDetails.item.sizes.join(', ')}
-                    </div>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.trendingSince && (
-                  <div className="detail-row">
-                    <span className="detail-label">Trending Since:</span>
-                    <span className="detail-value">
-                      {formatDate(viewItemDetails.item.trendingSince) || 'N/A'}
-                    </span>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.stockCount !== undefined && (
-                  <div className="detail-row">
-                    <span className="detail-label">Stock Count:</span>
-                    <span className="detail-value">
-                      {viewItemDetails.item.stockCount}
-                      {viewItemDetails.item.stockCount <= 5 && viewItemDetails.item.stockCount > 0 && (
-                        <span className="low-stock-warning"> (Low Stock)</span>
-                      )}
-                      {viewItemDetails.item.stockCount === 0 && (
-                        <span className="out-of-stock-warning"> (Out of Stock)</span>
-                      )}
-                    </span>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.vendor && (
-                  <div className="detail-row">
-                    <span className="detail-label">Vendor:</span>
-                    <span className="detail-value">{viewItemDetails.item.vendor}</span>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.manufacturer && (
-                  <div className="detail-row">
-                    <span className="detail-label">Manufacturer:</span>
-                    <span className="detail-value">{viewItemDetails.item.manufacturer}</span>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.sku && (
-                  <div className="detail-row">
-                    <span className="detail-label">SKU:</span>
-                    <span className="detail-value">{viewItemDetails.item.sku}</span>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.tags && viewItemDetails.item.tags.length > 0 && (
-                  <div className="detail-row">
-                    <span className="detail-label">Tags:</span>
-                    <div className="detail-value">
-                      <div className="tags-list">
-                        {viewItemDetails.item.tags.map((tag, index) => (
-                          <span key={index} className="tag-item">{tag}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.rating !== undefined && (
-                  <div className="detail-row">
-                    <span className="detail-label">Rating:</span>
-                    <span className="detail-value">
-                      {viewItemDetails.item.rating} / 5
-                      <div className="stars-container">
-                        {[...Array(5)].map((_, i) => (
-                          <i 
-                            key={i} 
-                            className={`fas fa-star ${i < Math.round(viewItemDetails.item.rating) ? 'active-star' : 'inactive-star'}`}
-                          ></i>
-                        ))}
-                      </div>
-                    </span>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.reviewCount !== undefined && (
-                  <div className="detail-row">
-                    <span className="detail-label">Review Count:</span>
-                    <span className="detail-value">{viewItemDetails.item.reviewCount}</span>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.discountPercentage !== undefined && (
-                  <div className="detail-row">
-                    <span className="detail-label">Discount:</span>
-                    <span className="detail-value">{viewItemDetails.item.discountPercentage}%</span>
-                  </div>
-                )}
-                
-                {viewItemDetails.item.originalPrice !== undefined && (
-                  <div className="detail-row">
-                    <span className="detail-label">Original Price:</span>
-                    <span className="detail-value">₹{viewItemDetails.item.originalPrice.toFixed(2)}</span>
-                  </div>
-                )}
-                
-                {/* Display any remaining fields dynamically */}
-                
-                <div className="detail-row">
-                  <div className="detail-value">
-                    <div className="all-properties">
-                      {Object.entries(viewItemDetails.item).map(([key, value]) => {
-                        // Skip properties we've already handled specifically
-                        const skipProperties = [
-                          'id', 'name', 'price', 'categoryName', 'categoryId', 'itemsCount', 
-                          'active', 'isQuick', 'createdAt', 'updatedAt', 'description', 
-                          'specifications', 'features', 'colors', 'sizes', 'trendingSince', 
-                          'stockCount', 'vendor', 'manufacturer', 'sku', 'tags', 'rating',
-                          'reviewCount', 'discountPercentage', 'originalPrice', 'imageUrl',
-                          'technicalSpecs', 'dimensions'
-                        ];
-                        
-                        if (skipProperties.includes(key)) return null;
-                        
-                        let displayValue;
-                        if (value === null || value === undefined) {
-                          displayValue = 'N/A';
-                        } else if (typeof value === 'object' && value.seconds !== undefined) {
-                          // Handle Firestore timestamp
-                          displayValue = formatDate(value);
-                        } else if (Array.isArray(value)) {
-                          // Handle arrays
-                          displayValue = (
-                            <div className="property-array">
-                              {value.map((item, idx) => (
-                                <div key={idx} className="array-item">
-                                  <span className="array-index">{idx}:</span> 
-                                  <span className="array-value">{typeof item === 'object' ? JSON.stringify(item) : item}</span>
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        } else if (typeof value === 'object') {
-                          // Handle objects
-                          try {
-                            displayValue = (
-                              <div className="property-object">
-                                {Object.entries(value).map(([objKey, objValue]) => (
-                                  <div key={objKey} className="object-item">
-                                    <span className="object-key">{objKey}:</span> 
-                                    <span className="object-value">{typeof objValue === 'object' ? JSON.stringify(objValue) : objValue}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            );
-                          } catch (e) {
-                            displayValue = 'Complex object';
-                          }
-                        } else if (typeof value === 'boolean') {
-                          displayValue = value ? 'Yes' : 'No';
-                        } else {
-                          displayValue = value.toString();
-                        }
-                        
-                        // Only show this property if it has a value
-                        if (displayValue === '' || displayValue === 'N/A') return null;
-                        
-                        const formattedKey = key
-                          .replace(/([A-Z])/g, ' $1')
-                          .replace(/^./, str => str.toUpperCase());
-                        
-                        return (
-                          <div key={key} className="property-row">
-                            <div className="property-label">{formattedKey}:</div>
-                            <div className="property-value">{displayValue}</div>
+                {/* Product Variants */}
+                {((viewItemDetails.item.colors && viewItemDetails.item.colors.length > 0) ||
+                  (viewItemDetails.item.sizes && viewItemDetails.item.sizes.length > 0)) && (
+                  <div className="detail-section">
+                    <h4>Product Variants</h4>
+                    
+                    {viewItemDetails.item.colors && viewItemDetails.item.colors.length > 0 && (
+                      <div className="detail-row">
+                        <span className="detail-label">Available Colors:</span>
+                        <div className="detail-value">
+                          <div className="colors-list">
+                            {viewItemDetails.item.colors.map((color, index) => (
+                              <div 
+                                key={index} 
+                                className="color-item" 
+                                style={{ backgroundColor: color }}
+                                title={color}
+                              ></div>
+                            ))}
                           </div>
-                        );
-                      })}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {viewItemDetails.item.sizes && viewItemDetails.item.sizes.length > 0 && (
+                      <div className="detail-row">
+                        <span className="detail-label">Available Sizes:</span>
+                        <div className="detail-value">
+                          {viewItemDetails.item.sizes.join(', ')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Inventory & Business Details */}
+                {(viewItemDetails.item.stockCount !== undefined || 
+                  viewItemDetails.item.vendor || 
+                  viewItemDetails.item.manufacturer || 
+                  viewItemDetails.item.sku) && (
+                  <div className="detail-section">
+                    <h4>Inventory & Business Details</h4>
+                    
+                    {viewItemDetails.item.stockCount !== undefined && (
+                      <div className="detail-row">
+                        <span className="detail-label">Stock Count:</span>
+                        <span className="detail-value">
+                          {viewItemDetails.item.stockCount}
+                          {viewItemDetails.item.stockCount <= 5 && viewItemDetails.item.stockCount > 0 && (
+                            <span className="low-stock-warning"> (Low Stock)</span>
+                          )}
+                          {viewItemDetails.item.stockCount === 0 && (
+                            <span className="out-of-stock-warning"> (Out of Stock)</span>
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {viewItemDetails.item.vendor && (
+                      <div className="detail-row">
+                        <span className="detail-label">Vendor:</span>
+                        <span className="detail-value">{viewItemDetails.item.vendor}</span>
+                      </div>
+                    )}
+                    
+                    {viewItemDetails.item.manufacturer && (
+                      <div className="detail-row">
+                        <span className="detail-label">Manufacturer:</span>
+                        <span className="detail-value">{viewItemDetails.item.manufacturer}</span>
+                      </div>
+                    )}
+                    
+                    {viewItemDetails.item.sku && (
+                      <div className="detail-row">
+                        <span className="detail-label">SKU:</span>
+                        <span className="detail-value">{viewItemDetails.item.sku}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Customer Feedback */}
+                {(viewItemDetails.item.rating !== undefined || 
+                  viewItemDetails.item.reviewCount !== undefined) && (
+                  <div className="detail-section">
+                    <h4>Customer Feedback</h4>
+                    
+                    {viewItemDetails.item.rating !== undefined && (
+                      <div className="detail-row">
+                        <span className="detail-label">Rating:</span>
+                        <span className="detail-value">
+                          {viewItemDetails.item.rating} / 5
+                          <div className="stars-container">
+                            {[...Array(5)].map((_, i) => (
+                              <i 
+                                key={i} 
+                                className={`fas fa-star ${i < Math.round(viewItemDetails.item.rating) ? 'active-star' : 'inactive-star'}`}
+                              ></i>
+                            ))}
+                          </div>
+                        </span>
+                      </div>
+                    )}
+                    
+                    {viewItemDetails.item.reviewCount !== undefined && (
+                      <div className="detail-row">
+                        <span className="detail-label">Review Count:</span>
+                        <span className="detail-value">{viewItemDetails.item.reviewCount}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Tags */}
+                {viewItemDetails.item.tags && viewItemDetails.item.tags.length > 0 && (
+                  <div className="detail-section">
+                    <h4>Tags</h4>
+                    <div className="detail-row">
+                      <div className="detail-value">
+                        <div className="tags-list">
+                          {viewItemDetails.item.tags.map((tag, index) => (
+                            <span key={index} className="tag-item">{tag}</span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
             

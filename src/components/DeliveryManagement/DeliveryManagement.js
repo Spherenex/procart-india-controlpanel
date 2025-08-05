@@ -890,7 +890,7 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   collection, 
   getDocs,
@@ -919,7 +919,6 @@ const DeliveryManagement = () => {
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [searchTerm, setSearchTerm] = useState('');
   const [updateStatusLoading, setUpdateStatusLoading] = useState(false);
-  const [allOrders, setAllOrders] = useState([]); // Store all orders for filtering
   const [filteredDeliveries, setFilteredDeliveries] = useState({
     quick: [],
     normal: [],
@@ -937,6 +936,238 @@ const DeliveryManagement = () => {
     'Pending Payment'
   ];
 
+  // Enhanced function to normalize orders (handle both individual and cart orders)
+  const normalizeOrder = (order) => {
+    // If order already has items array (cart order), return as is
+    if (order.items && Array.isArray(order.items)) {
+      return order;
+    }
+    
+    // If it's an individual order, convert to items array format
+    if (order.productId || order.productName) {
+      const normalizedOrder = {
+        ...order,
+        items: [{
+          id: order.productId || 'unknown',
+          name: order.productName || 'Unknown Product',
+          productName: order.productName || 'Unknown Product',
+          price: order.price || 0,
+          quantity: order.quantity || 1,
+          imageUrl: order.imageUrl || order.image || '',
+          image: order.imageUrl || order.image || '',
+          deliverySpeed: order.deliverySpeed || order.deliveryOption || order.originalDeliveryOption || 'normal',
+          discountPercentage: order.discountPercentage || 0,
+          finalPrice: order.price || 0,
+          originalPrice: order.originalPrice || order.price || 0
+        }]
+      };
+      
+      return normalizedOrder;
+    }
+    
+    // Fallback for orders without clear structure
+    return {
+      ...order,
+      items: []
+    };
+  };
+
+  // Create deliveries from orders
+  const processDeliveries = useCallback(async (ordersData) => {
+    try {
+      const groupedDeliveries = {
+        quick: [],
+        normal: [],
+        late: []
+      };
+
+      // Sort orders by date in descending order (newest first)
+      const sortedOrdersData = ordersData.sort((a, b) => {
+        const dateA = a.orderDate instanceof Date ? a.orderDate : new Date(a.orderDate || 0);
+        const dateB = b.orderDate instanceof Date ? b.orderDate : new Date(b.orderDate || 0);
+        return dateB - dateA; // Descending order (newest first)
+      });
+
+      // Process all orders
+      for (const order of sortedOrdersData) {
+        // First normalize the order to ensure consistent structure
+        const normalizedOrder = normalizeOrder(order);
+        
+        if (normalizedOrder.items && Array.isArray(normalizedOrder.items) && normalizedOrder.items.length > 0) {
+          const speedsInOrder = new Set();
+          normalizedOrder.items.forEach(item => {
+            const speed = item.deliverySpeed || item.originalDeliverySpeed || 'normal';
+            speedsInOrder.add(speed);
+          });
+
+          for (const speed of speedsInOrder) {
+            if (['quick', 'normal', 'late'].includes(speed)) {
+              const speedItems = normalizedOrder.items.filter(item => {
+                const itemSpeed = item.deliverySpeed || item.originalDeliverySpeed || 'normal';
+                return itemSpeed === speed;
+              });
+              
+              const deliveryId = `${normalizedOrder.id}_${speed}`;
+              const deliveryRef = doc(db, 'deliveries', deliveryId);
+              const deliverySnap = await getDoc(deliveryRef);
+
+              let deliveryData;
+              if (!deliverySnap.exists()) {
+                // Get the specific status for this delivery speed from statusHistory
+                let speedStatus = normalizedOrder.status || 'Pending';
+                if (normalizedOrder.statusHistory && Array.isArray(normalizedOrder.statusHistory)) {
+                  const speedStatusUpdates = normalizedOrder.statusHistory
+                    .filter(update => !update.deliverySpeed || update.deliverySpeed === speed)
+                    .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                  
+                  if (speedStatusUpdates.length > 0) {
+                    speedStatus = speedStatusUpdates[0].status;
+                  }
+                }
+                
+                deliveryData = {
+                  id: deliveryId,
+                  orderId: normalizedOrder.id,
+                  orderDate: normalizedOrder.orderDate,
+                  customerName: normalizedOrder.customerName || 'Guest',
+                  customerId: normalizedOrder.userId || 'guest',
+                  customerEmail: normalizedOrder.customerEmail || 'Not provided',
+                  customerPhone: normalizedOrder.customerPhone || 'Not provided',
+                  deliveryAddress: normalizedOrder.deliveryAddress || 'Not specified',
+                  paymentMethod: normalizedOrder.paymentMethod || 'Not specified',
+                  paymentId: normalizedOrder.paymentId || 'N/A',
+                  deliverySpeed: speed,
+                  items: speedItems,
+                  status: speedStatus,
+                  statusHistory: normalizedOrder.statusHistory?.filter(history => !history.deliverySpeed || history.deliverySpeed === speed) || [],
+                  subtotal: speedItems.reduce((sum, item) => sum + ((item.price || item.finalPrice || 0) * (item.quantity || 1)), 0),
+                  notes: normalizedOrder.notes || '',
+                  createdAt: serverTimestamp(),
+                  lastUpdated: serverTimestamp()
+                };
+                
+                await setDoc(deliveryRef, deliveryData);
+              } else {
+                // Always refresh orderDate from the current order data to ensure consistency
+                deliveryData = deliverySnap.data();
+                deliveryData.id = deliverySnap.id; // Make sure ID is included
+                deliveryData.orderDate = normalizedOrder.orderDate; // Use fresh date from orders collection
+                
+                // Update the delivery document with the correct orderDate if it's different
+                const existingDate = deliveryData.orderDate instanceof Timestamp 
+                  ? deliveryData.orderDate.toDate() 
+                  : deliveryData.createdAt instanceof Timestamp
+                  ? deliveryData.createdAt.toDate()
+                  : deliveryData.orderDate ? new Date(deliveryData.orderDate) 
+                  : deliveryData.createdAt ? new Date(deliveryData.createdAt)
+                  : new Date(Date.now());
+                
+                const freshDate = normalizedOrder.orderDate;
+                
+                // If dates are significantly different, update the delivery document
+                if (Math.abs(existingDate.getTime() - freshDate.getTime()) > 60000) { // More than 1 minute difference
+                  await updateDoc(deliveryRef, {
+                    orderDate: normalizedOrder.orderDate,
+                    lastUpdated: serverTimestamp()
+                  });
+                  console.log(`Updated delivery ${deliveryId} with correct orderDate: ${normalizedOrder.orderDate}`);
+                }
+              }
+
+              groupedDeliveries[speed].push(deliveryData);
+            }
+          }
+        } else {
+          // Handle orders without items (fallback to normal delivery)
+          const deliveryId = `${normalizedOrder.id}_normal`;
+          const deliveryRef = doc(db, 'deliveries', deliveryId);
+          const deliverySnap = await getDoc(deliveryRef);
+
+          let deliveryData;
+          if (!deliverySnap.exists()) {
+            deliveryData = {
+              id: deliveryId,
+              orderId: normalizedOrder.id,
+              orderDate: normalizedOrder.orderDate,
+              customerName: normalizedOrder.customerName || 'Guest',
+              customerId: normalizedOrder.userId || 'guest',
+              customerEmail: normalizedOrder.customerEmail || 'Not provided',
+              customerPhone: normalizedOrder.customerPhone || 'Not provided',
+              deliveryAddress: normalizedOrder.deliveryAddress || 'Not specified',
+              paymentMethod: normalizedOrder.paymentMethod || 'Not specified',
+              paymentId: normalizedOrder.paymentId || 'N/A',
+              deliverySpeed: 'normal',
+              items: [],
+              status: normalizedOrder.status || 'Pending',
+              statusHistory: normalizedOrder.statusHistory || [],
+              subtotal: normalizedOrder.totalAmount || normalizedOrder.price || 0,
+              notes: normalizedOrder.notes || '',
+              createdAt: serverTimestamp(),
+              lastUpdated: serverTimestamp()
+            };
+            
+            await setDoc(deliveryRef, deliveryData);
+          } else {
+            // Always refresh orderDate from the current order data to ensure consistency
+            deliveryData = deliverySnap.data();
+            deliveryData.id = deliverySnap.id;
+            deliveryData.orderDate = normalizedOrder.orderDate; // Use fresh date from orders collection
+            
+            // Update the delivery document with the correct orderDate if it's different
+            const existingDate = deliveryData.orderDate instanceof Timestamp 
+              ? deliveryData.orderDate.toDate() 
+              : deliveryData.createdAt instanceof Timestamp
+              ? deliveryData.createdAt.toDate()
+              : deliveryData.orderDate ? new Date(deliveryData.orderDate) 
+              : deliveryData.createdAt ? new Date(deliveryData.createdAt)
+              : new Date(Date.now());
+            
+            const freshDate = normalizedOrder.orderDate;
+            
+            // If dates are significantly different, update the delivery document
+            if (Math.abs(existingDate.getTime() - freshDate.getTime()) > 60000) { // More than 1 minute difference
+              await updateDoc(deliveryRef, {
+                orderDate: normalizedOrder.orderDate,
+                lastUpdated: serverTimestamp()
+              });
+              console.log(`Updated delivery ${deliveryId} with correct orderDate: ${normalizedOrder.orderDate}`);
+            }
+          }
+
+          groupedDeliveries.normal.push(deliveryData);
+        }
+      }
+
+      // Sort each category by order date (newest first)
+      groupedDeliveries.quick.sort((a, b) => {
+        const dateA = a.orderDate instanceof Date ? a.orderDate : new Date(a.orderDate || 0);
+        const dateB = b.orderDate instanceof Date ? b.orderDate : new Date(b.orderDate || 0);
+        return dateB - dateA;
+      });
+      
+      groupedDeliveries.normal.sort((a, b) => {
+        const dateA = a.orderDate instanceof Date ? a.orderDate : new Date(a.orderDate || 0);
+        const dateB = b.orderDate instanceof Date ? b.orderDate : new Date(b.orderDate || 0);
+        return dateB - dateA;
+      });
+      
+      groupedDeliveries.late.sort((a, b) => {
+        const dateA = a.orderDate instanceof Date ? a.orderDate : new Date(a.orderDate || 0);
+        const dateB = b.orderDate instanceof Date ? b.orderDate : new Date(b.orderDate || 0);
+        return dateB - dateA;
+      });
+
+      console.log("All deliveries:", groupedDeliveries);
+      setDeliveries(groupedDeliveries);
+      setFilteredDeliveries(groupedDeliveries); // Initially show all deliveries
+      setLoading(false);
+    } catch (error) {
+      console.error("Error processing orders for delivery:", error);
+      setError(`Failed to process orders: ${error.message}`);
+      setLoading(false);
+    }
+  }, []); // useCallback dependency array
+
   useEffect(() => {
     const fetchDeliveries = async () => {
       try {
@@ -952,7 +1183,6 @@ const DeliveryManagement = () => {
           console.log("No orders found");
           setDeliveries({ quick: [], normal: [], late: [] });
           setFilteredDeliveries({ quick: [], normal: [], late: [] });
-          setAllOrders([]);
           setLoading(false);
           return;
         }
@@ -967,12 +1197,15 @@ const DeliveryManagement = () => {
             ...data,
             orderDate: data.orderDate instanceof Timestamp 
               ? data.orderDate.toDate() 
-              : data.orderDate ? new Date(data.orderDate) : new Date()
+              : data.createdAt instanceof Timestamp
+              ? data.createdAt.toDate()
+              : data.orderDate ? new Date(data.orderDate) 
+              : data.createdAt ? new Date(data.createdAt)
+              : new Date()
           };
         });
         
-        // Store all orders for filtering
-        setAllOrders(ordersData);
+        // Store processed data
         
         // Process and create deliveries from orders
         await processDeliveries(ordersData);
@@ -985,7 +1218,7 @@ const DeliveryManagement = () => {
     };
 
     fetchDeliveries();
-  }, []); // Only fetch once on component mount
+  }, [processDeliveries]); // Added processDeliveries as dependency
 
   // Apply filters when filter criteria change
   useEffect(() => {
@@ -993,93 +1226,6 @@ const DeliveryManagement = () => {
       applyFilters();
     }
   }, [statusFilter, dateRange, searchTerm, deliveries]);
-
-  // Create deliveries from orders
-  const processDeliveries = async (ordersData) => {
-    try {
-      const groupedDeliveries = {
-        quick: [],
-        normal: [],
-        late: []
-      };
-
-      // Process all orders
-      for (const order of ordersData) {
-        if (order.items && Array.isArray(order.items)) {
-          const speedsInOrder = new Set();
-          order.items.forEach(item => {
-            const speed = item.deliverySpeed || 'normal';
-            speedsInOrder.add(speed);
-          });
-
-          for (const speed of speedsInOrder) {
-            if (['quick', 'normal', 'late'].includes(speed)) {
-              const speedItems = order.items.filter(item => (item.deliverySpeed || 'normal') === speed);
-              
-              const deliveryId = `${order.id}_${speed}`;
-              const deliveryRef = doc(db, 'deliveries', deliveryId);
-              const deliverySnap = await getDoc(deliveryRef);
-
-              let deliveryData;
-              if (!deliverySnap.exists()) {
-                // Get the specific status for this delivery speed from statusHistory
-                let speedStatus = order.status || 'Pending';
-                if (order.statusHistory && Array.isArray(order.statusHistory)) {
-                  const speedStatusUpdates = order.statusHistory
-                    .filter(update => !update.deliverySpeed || update.deliverySpeed === speed)
-                    .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-                  
-                  if (speedStatusUpdates.length > 0) {
-                    speedStatus = speedStatusUpdates[0].status;
-                  }
-                }
-                
-                deliveryData = {
-                  id: deliveryId,
-                  orderId: order.id,
-                  orderDate: order.orderDate,
-                  customerName: order.customerName || 'Guest',
-                  customerId: order.userId || 'guest',
-                  customerEmail: order.customerEmail || 'Not provided',
-                  customerPhone: order.customerPhone || 'Not provided',
-                  deliveryAddress: order.deliveryAddress || 'Not specified',
-                  paymentMethod: order.paymentMethod || 'Not specified',
-                  paymentId: order.paymentId || 'N/A',
-                  deliverySpeed: speed,
-                  items: speedItems,
-                  status: speedStatus,
-                  statusHistory: order.statusHistory?.filter(history => !history.deliverySpeed || history.deliverySpeed === speed) || [],
-                  subtotal: speedItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0),
-                  notes: order.notes || '',
-                  createdAt: serverTimestamp(),
-                  lastUpdated: serverTimestamp()
-                };
-                
-                await setDoc(deliveryRef, deliveryData);
-              } else {
-                deliveryData = deliverySnap.data();
-                deliveryData.id = deliverySnap.id; // Make sure ID is included
-                deliveryData.orderDate = deliveryData.orderDate instanceof Timestamp 
-                  ? deliveryData.orderDate.toDate() 
-                  : new Date(deliveryData.orderDate || Date.now());
-              }
-
-              groupedDeliveries[speed].push(deliveryData);
-            }
-          }
-        }
-      }
-
-      console.log("All deliveries:", groupedDeliveries);
-      setDeliveries(groupedDeliveries);
-      setFilteredDeliveries(groupedDeliveries); // Initially show all deliveries
-      setLoading(false);
-    } catch (error) {
-      console.error("Error processing orders for delivery:", error);
-      setError(`Failed to process orders: ${error.message}`);
-      setLoading(false);
-    }
-  };
 
   // Apply filters to deliveries
   const applyFilters = () => {
@@ -1188,17 +1334,6 @@ const DeliveryManagement = () => {
             status: newStatus, // Also update the main status field
             lastUpdated: serverTimestamp()
           });
-          
-          // Update the order in allOrders state
-          setAllOrders(prev => prev.map(order => 
-            order.id === orderId 
-              ? {
-                  ...order, 
-                  status: newStatus, 
-                  statusHistory: [...(order.statusHistory || []), statusUpdate]
-                }
-              : order
-          ));
           
           console.log(`Order ${orderId} status updated to ${newStatus} for ${deliveryData.deliverySpeed} delivery`);
         } else {
@@ -1358,10 +1493,6 @@ const DeliveryManagement = () => {
             lastUpdated: serverTimestamp()
           });
           
-          // Update in allOrders state
-          setAllOrders(prev => prev.map(order => 
-            order.id === orderId ? { ...order, notes } : order
-          ));
         }
       }
       

@@ -1164,7 +1164,14 @@ const OrdersManagement = () => {
       late: [] 
     };
     
-    ordersData.forEach(order => {
+    // Sort orders by date in descending order (newest first)
+    const sortedOrdersData = ordersData.sort((a, b) => {
+      const dateA = a.orderDate instanceof Date ? a.orderDate : new Date(a.orderDate || 0);
+      const dateB = b.orderDate instanceof Date ? b.orderDate : new Date(b.orderDate || 0);
+      return dateB - dateA; // Descending order (newest first)
+    });
+    
+    sortedOrdersData.forEach(order => {
       // First normalize the order to ensure consistent structure
       const normalizedOrder = normalizeOrder(order);
       
@@ -1238,6 +1245,25 @@ const OrdersManagement = () => {
           originalOrder: normalizedOrder
         });
       }
+    });
+    
+    // Sort each category by order date (newest first)
+    groupedOrders.quick.sort((a, b) => {
+      const dateA = a.orderDate instanceof Date ? a.orderDate : new Date(a.orderDate || 0);
+      const dateB = b.orderDate instanceof Date ? b.orderDate : new Date(b.orderDate || 0);
+      return dateB - dateA;
+    });
+    
+    groupedOrders.normal.sort((a, b) => {
+      const dateA = a.orderDate instanceof Date ? a.orderDate : new Date(a.orderDate || 0);
+      const dateB = b.orderDate instanceof Date ? b.orderDate : new Date(b.orderDate || 0);
+      return dateB - dateA;
+    });
+    
+    groupedOrders.late.sort((a, b) => {
+      const dateA = a.orderDate instanceof Date ? a.orderDate : new Date(a.orderDate || 0);
+      const dateB = b.orderDate instanceof Date ? b.orderDate : new Date(b.orderDate || 0);
+      return dateB - dateA;
     });
     
     return groupedOrders;

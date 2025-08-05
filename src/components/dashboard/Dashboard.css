@@ -279,10 +279,11 @@
   align-items: center;
 }
 
-/* Text-based action buttons (Process, Complete) */
+/* Text-based action buttons (Process, Complete, View, Done) */
 .action-btn.process-btn,
 .action-btn.complete-btn,
-.action-btn.view-btn {
+.action-btn.view-btn,
+.action-btn.done-btn {
   background: transparent;
   color: #333;
   font-weight: 500;
@@ -298,6 +299,16 @@
 .action-btn.view-btn:hover {
   color: #4a90e2;
   text-decoration: underline;
+}
+
+/* Done button - disabled state */
+.action-btn.done-btn {
+  color: #28a745;
+  cursor: default;
+}
+
+.action-btn.done-btn:disabled {
+  opacity: 0.7;
 }
 
 /* Cancel button - round style */
@@ -371,7 +382,8 @@
   /* Only show the cancel button on mobile */
   .action-btn.process-btn,
   .action-btn.complete-btn,
-  .action-btn.view-btn {
+  .action-btn.view-btn,
+  .action-btn.done-btn {
     display: none;
   }
   

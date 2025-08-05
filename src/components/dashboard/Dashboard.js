@@ -739,7 +739,15 @@ function Dashboard({ setMode }) {
                               </button>
                             </>
                           )}
-                          {(order.status === 'completed' || order.status === 'cancelled') && (
+                          {order.status === 'completed' && (
+                            <button
+                              className="action-btn done-btn"
+                              disabled
+                            >
+                              Done
+                            </button>
+                          )}
+                          {order.status === 'cancelled' && (
                             <button
                               className="action-btn view-btn"
                               onClick={() => handleModeChange('bulkOrderDetails', `/bulk-order/${order.id}`)}
